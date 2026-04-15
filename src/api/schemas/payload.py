@@ -20,7 +20,7 @@ class EmployeeProfile(BaseModel):
     name: str
     priority: Literal["Regular", "Part-Time", "Extras"]
     rating: int = Field(ge=1, le=5)
-    prefHrs: int
+    prefHrs: int = Field(ge=0, le=168)
     mondayAm: bool
     mondayPm: bool
     tuesdayAm: bool

@@ -32,11 +32,14 @@ _SC_FIELDS = [
 
 
 def _is_empty(value) -> bool:
-    """True if value is None, empty list, or a model with all-None fields."""
+    """True if value is None, empty list, or a dict/model with all-None values."""
     if value is None:
         return True
     if isinstance(value, list):
         return len(value) == 0
+    if isinstance(value, dict):
+        # model_dump() output: treat as empty only if all values are None
+        return all(v is None for v in value.values())
     if hasattr(value, "model_dump"):
         return all(v is None for v in value.model_dump().values())
     return False

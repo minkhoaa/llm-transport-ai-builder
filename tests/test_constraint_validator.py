@@ -65,7 +65,7 @@ def test_validate_calls_groq_and_returns_report():
     mock_client.chat.completions.create.return_value.choices = [
         MagicMock(message=MagicMock(content=json.dumps(extractor_output)))
     ]
-    llm_sc = SoftConstraints()
+    llm_sc = SoftConstraints()  # empty — extractor finds constraint LLM missed
     with patch("src.validator.constraint_validator.create_groq_client", return_value=mock_client):
         report = v.validate(
             limitation_instructions="Must not start before 2pm.",
@@ -73,3 +73,6 @@ def test_validate_calls_groq_and_returns_report():
             api_key="fake",
         )
     assert report.confidence in ("high", "medium", "low")
+    # extractor found a constraint the LLM missed — should be extractor_only
+    assert report.passed is False
+    assert any(d.type == "extractor_only" for d in report.discrepancies)

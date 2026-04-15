@@ -32,10 +32,4 @@ def generate_profile(request: GenerateRequest):
 
 @router.post("/generate/batch", response_model=BatchGenerateResponse)
 def generate_batch(request: BatchGenerateRequest):
-    try:
-        return _service.generate_batch(request)
-    except InvalidPersonaError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-    except Exception as exc:
-        logger.exception(f"Batch generation failed: {exc}")
-        raise HTTPException(status_code=500, detail=str(exc))
+    return _service.generate_batch(request)

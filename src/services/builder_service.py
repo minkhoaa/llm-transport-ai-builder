@@ -43,7 +43,7 @@ class BuilderService:
             try:
                 response = self.generate_single(persona, request.api_key)
                 profiles.append(response)
-            except (GenerationError, Exception) as exc:
+            except Exception as exc:
                 logger.warning(f"Batch generation failed for '{persona}': {exc}")
                 failed += 1
 

@@ -25,6 +25,7 @@ CLIENTS: List[dict] = [
     {"clientId": 20, "clientName": "South Bow Infrastructure Holdings Ltd."},
     {"clientId": 21, "clientName": "Strathcona Resources"},
     {"clientId": 22, "clientName": "University of Calgary"},
+    # clientId 23 ("dsd") is a test entry excluded from the production registry
     {"clientId": 24, "clientName": "Enterprise Logistics Group"},
 ]
 
