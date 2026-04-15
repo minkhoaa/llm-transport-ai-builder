@@ -11,7 +11,7 @@ from src.config.llm_config import (
     EXTRACTION_MAX_TOKENS,
     EXTRACTION_MODEL,
     EXTRACTION_TEMPERATURE,
-    create_groq_client,
+    create_client,
 )
 from src.generator.prompts.extraction_prompt import EXTRACTION_SYSTEM_PROMPT
 
@@ -53,7 +53,7 @@ class ConstraintValidator:
         api_key: str,
     ) -> ValidationReport:
         """Run extraction on limitationInstructions, diff against llm_soft_constraints."""
-        client = create_groq_client(api_key)
+        client = create_client(api_key)
         try:
             response = client.chat.completions.create(
                 model=EXTRACTION_MODEL,

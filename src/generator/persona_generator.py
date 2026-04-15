@@ -11,7 +11,7 @@ from src.config.llm_config import (
     GENERATION_MAX_TOKENS,
     GENERATION_MODEL,
     GENERATION_TEMPERATURE,
-    create_groq_client,
+    create_client,
 )
 from src.generator.prompts.generation_prompt import GENERATION_SYSTEM_PROMPT
 
@@ -47,7 +47,7 @@ class PersonaGenerator:
         self, persona: str, api_key: str, *, max_retries: int = 3
     ) -> tuple[FullPayload, int]:
         """Call LLM to generate a FullPayload. Returns (payload, attempts_used)."""
-        client = create_groq_client(api_key)
+        client = create_client(api_key)
         last_error: str | None = None
 
         for attempt in range(1, max_retries + 1):

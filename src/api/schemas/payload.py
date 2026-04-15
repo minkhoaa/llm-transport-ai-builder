@@ -1,13 +1,13 @@
 """Pydantic models for builder payload input and output."""
 from __future__ import annotations
 
-import uuid
-from typing import List, Literal, Optional
-
-from typing import Any
+import itertools
+from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator, model_serializer
 
+
+_id_counter = itertools.count(1)
 
 JobType = Literal["MOV", "WH", "HHG"]
 
@@ -30,14 +30,14 @@ class CompanyRef(BaseModel):
 # --- Employee ---
 
 class EmployeeProfile(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: int = Field(default_factory=lambda: next(_id_counter))
 
     @field_validator("id", mode="before")
     @classmethod
-    def generate_id_if_none(cls, v: object) -> str:
+    def generate_id_if_none(cls, v: object) -> int:
         if v is None:
-            return str(uuid.uuid4())
-        return v
+            return next(_id_counter)
+        return int(v)
 
     name: str
     priority: Literal["Regular", "Part-Time", "Extras"]

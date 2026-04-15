@@ -66,7 +66,7 @@ def test_validate_calls_groq_and_returns_report():
         MagicMock(message=MagicMock(content=json.dumps(extractor_output)))
     ]
     llm_sc = SoftConstraints()  # empty — extractor finds constraint LLM missed
-    with patch("src.validator.constraint_validator.create_groq_client", return_value=mock_client):
+    with patch("src.validator.constraint_validator.create_client", return_value=mock_client):
         report = v.validate(
             limitation_instructions="Must not start before 2pm.",
             llm_soft_constraints=llm_sc,

@@ -57,13 +57,18 @@ def test_employee_personalities_is_list():
 
 def test_employee_id_auto_generated():
     e = EmployeeProfile(**make_employee())
-    assert isinstance(e.id, str) and len(e.id) == 36  # UUID4
+    assert isinstance(e.id, int) and e.id >= 1
 
 
 def test_employee_id_unique_per_instance():
     e1 = EmployeeProfile(**make_employee())
     e2 = EmployeeProfile(**make_employee())
     assert e1.id != e2.id
+
+
+def test_employee_id_null_becomes_int():
+    e = EmployeeProfile(**make_employee(id=None))
+    assert isinstance(e.id, int) and e.id >= 1
 
 
 def test_job_type_invalid_value():

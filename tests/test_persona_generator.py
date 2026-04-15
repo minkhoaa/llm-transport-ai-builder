@@ -54,7 +54,7 @@ def test_all_27_personas_valid():
 def test_generate_returns_payload_on_valid_response():
     gen = PersonaGenerator()
     mock_client = _mock_groq_response(VALID_PAYLOAD)
-    with patch("src.generator.persona_generator.create_groq_client", return_value=mock_client):
+    with patch("src.generator.persona_generator.create_client", return_value=mock_client):
         payload, attempts = gen.generate("Night Owl", "fake_key")
     assert payload.employee.name == "Tom Nguyen"
     assert attempts == 1
@@ -67,7 +67,7 @@ def test_generate_retries_on_invalid_json():
         MagicMock(choices=[MagicMock(message=MagicMock(content="not json"))]),
         MagicMock(choices=[MagicMock(message=MagicMock(content=json.dumps(VALID_PAYLOAD)))]),
     ]
-    with patch("src.generator.persona_generator.create_groq_client", return_value=mock_client):
+    with patch("src.generator.persona_generator.create_client", return_value=mock_client):
         payload, attempts = gen.generate("Night Owl", "fake_key")
     assert attempts == 2
 
@@ -78,6 +78,6 @@ def test_generate_raises_after_max_retries():
     mock_client.chat.completions.create.return_value.choices = [
         MagicMock(message=MagicMock(content="bad json"))
     ]
-    with patch("src.generator.persona_generator.create_groq_client", return_value=mock_client):
+    with patch("src.generator.persona_generator.create_client", return_value=mock_client):
         with pytest.raises(GenerationError):
             gen.generate("Night Owl", "fake_key", max_retries=3)
