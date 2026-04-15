@@ -48,6 +48,32 @@ def test_employee_personalities_is_list():
     assert isinstance(e.personalities, list)
 
 
+def test_employee_id_auto_generated():
+    e = EmployeeProfile(**make_employee())
+    assert isinstance(e.id, str) and len(e.id) == 36  # UUID4
+
+
+def test_employee_id_unique_per_instance():
+    e1 = EmployeeProfile(**make_employee())
+    e2 = EmployeeProfile(**make_employee())
+    assert e1.id != e2.id
+
+
+def test_job_type_invalid_value():
+    with pytest.raises(ValidationError):
+        EmployeeProfile(**make_employee(preferredJobTypes=["INVALID"]))
+
+
+def test_job_type_overlap_rejected():
+    with pytest.raises(ValidationError):
+        EmployeeProfile(**make_employee(preferredJobTypes=["HHG"], avoidedJobTypes=["HHG"]))
+
+
+def test_job_type_no_overlap_passes():
+    e = EmployeeProfile(**make_employee(preferredJobTypes=["HHG", "WH"], avoidedJobTypes=["MOV"]))
+    assert set(e.preferredJobTypes) & set(e.avoidedJobTypes) == set()
+
+
 def test_batch_request_count_bounds():
     with pytest.raises(ValidationError):
         BatchGenerateRequest(persona="Night Owl", count=21, api_key="k")

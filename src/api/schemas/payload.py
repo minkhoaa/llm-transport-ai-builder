@@ -1,9 +1,13 @@
 """Pydantic models for builder payload input and output."""
 from __future__ import annotations
 
+import uuid
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+
+JobType = Literal["MOV", "WH", "HHG"]
 
 
 # --- Company reference ---
@@ -16,7 +20,15 @@ class CompanyRef(BaseModel):
 # --- Employee ---
 
 class EmployeeProfile(BaseModel):
-    id: None = None
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def generate_id_if_none(cls, v: object) -> str:
+        if v is None:
+            return str(uuid.uuid4())
+        return v
+
     name: str
     priority: Literal["Regular", "Part-Time", "Extras"]
     rating: int = Field(ge=1, le=5)
@@ -37,10 +49,19 @@ class EmployeeProfile(BaseModel):
     sundayPm: bool
     personalities: List[str]
     additionalNotes: str
-    preferredJobTypes: List[str]
-    avoidedJobTypes: List[str]
+    preferredJobTypes: List[JobType] = Field(default_factory=list)
+    avoidedJobTypes: List[JobType] = Field(default_factory=list)
     lovedByCompanies: List[CompanyRef]
     hatedByCompanies: List[CompanyRef]
+
+    @model_validator(mode="after")
+    def check_no_overlap(self) -> "EmployeeProfile":
+        overlap = set(self.preferredJobTypes) & set(self.avoidedJobTypes)
+        if overlap:
+            raise ValueError(
+                f"Job types cannot appear in both preferredJobTypes and avoidedJobTypes: {overlap}"
+            )
+        return self
 
 
 # --- Limitation ---

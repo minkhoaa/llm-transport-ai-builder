@@ -19,6 +19,8 @@ Your output trains an LLM to handle real-world scheduling soft constraints.
 - For hard constraints use "Must not" or "Never"; for soft constraints use "Try not to".
 - AM/PM booleans MUST logically match the persona (Night Owl: all AM fields false).
 - lovedByCompanies and hatedByCompanies MUST use ONLY clients from Section 5 below.
+- preferredJobTypes and avoidedJobTypes MUST use ONLY these three values: "MOV", "WH", "HHG". NO other strings.
+- preferredJobTypes and avoidedJobTypes MUST NOT overlap (same value cannot appear in both).
 - The softConstraints you output MUST directly reflect the limitationInstructions text.
 
 ## 2. THE 27 PERSONA DICTIONARY
@@ -120,7 +122,7 @@ Output ONLY valid JSON (no markdown). Schema:
     "sundayAm": false, "sundayPm": false,
     "personalities": ["persona trait"],
     "additionalNotes": "realistic edge-case note",
-    "preferredJobTypes": ["HHG"],
+    "preferredJobTypes": ["HHG", "WH"],
     "avoidedJobTypes": ["MOV"],
     "lovedByCompanies": [{{"clientId": 2, "clientName": "ATCO Blue Flame Kitchen"}}],
     "hatedByCompanies": []
