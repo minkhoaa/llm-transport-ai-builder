@@ -741,6 +741,7 @@
     <div class="sidebar-section">
       <div class="sidebar-label">Provider</div>
       <select class="api-key-input" id="provider" onchange="onProviderChange()" style="cursor:pointer">
+        <option value="9router">9Router (local)</option>
         <option value="groq">Groq</option>
         <option value="openai">OpenAI</option>
         <option value="minimax">MiniMax</option>
@@ -753,6 +754,7 @@
       <div id="custom-url-row" style="display:none;margin-top:6px">
         <input type="text" class="api-key-input" id="custom-url" placeholder="https://u2026/v1" autocomplete="off">
       </div>
+      <div id="provider-hint" style="margin-top:5px;font-family:var(--font-mono);font-size:8.5px;color:var(--text-muted);line-height:1.5"></div>
     </div>
 
     <!-- API Key -->
@@ -762,6 +764,13 @@
         <input type="password" class="api-key-input" id="api-key" placeholder="Enter API keyu2026" autocomplete="off">
         <button class="api-key-toggle" id="api-key-toggle" onclick="toggleApiKey()">ud83dudc41</button>
       </div>
+    </div>
+
+    <!-- Model -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Model <span style="color:var(--text-muted);font-size:8px">(optional override)</span></div>
+      <input type="text" class="api-key-input" id="model-input" placeholder="auto" autocomplete="off" oninput="checkReady()">
+      <div id="model-hint" style="margin-top:5px;font-family:var(--font-mono);font-size:8.5px;color:var(--text-muted);line-height:1.5"></div>
     </div>
 
     <!-- Mode -->
@@ -885,21 +894,31 @@ const PERSONAS = [
 ];
 
 // ============ PROVIDERS ============
-const PROVIDER_PLACEHOLDERS = {
-  groq:       'gsk_u2026',
-  openai:     'sk-u2026',
-  minimax:    'eyJu2026',
-  together:   'Enter Together API keyu2026',
-  fireworks:  'Enter Fireworks API keyu2026',
-  deepseek:   'Enter DeepSeek API keyu2026',
-  openrouter: 'sk-or-u2026',
-  custom:     'Enter API keyu2026',
+const PROVIDERS_META = {
+  '9router':    { placeholder: 'sk-<machineId>-u2026',     model: 'cc/claude-sonnet-4-6',          hint: 'u26a1 Local u2014 http://localhost:20128/v1\nGet key from Dashboard u2192 API Keys' },
+  groq:         { placeholder: 'gsk_u2026',                 model: 'openai/gpt-oss-120b',             hint: 'api.groq.com' },
+  openai:       { placeholder: 'sk-u2026',                  model: 'gpt-4o',                          hint: 'api.openai.com' },
+  minimax:      { placeholder: 'eyJu2026',                  model: 'MiniMax-M2.7',                    hint: 'api.minimax.chat' },
+  together:     { placeholder: 'Enter Together key',        model: 'meta-llama/Llama-3-70b-chat-hf',  hint: 'api.together.xyz' },
+  fireworks:    { placeholder: 'Enter Fireworks key',       model: 'accounts/fireworks/models/llama-v3-70b-instruct', hint: 'api.fireworks.ai' },
+  deepseek:     { placeholder: 'Enter DeepSeek key',        model: 'deepseek-chat',                   hint: 'api.deepseek.com' },
+  openrouter:   { placeholder: 'sk-or-u2026',               model: 'openai/gpt-4o',                   hint: 'openrouter.ai' },
+  custom:       { placeholder: 'Enter API key',             model: '',                                hint: 'Enter your base URL above' },
 };
 
 function onProviderChange() {
   const p = document.getElementById('provider').value;
-  document.getElementById('api-key').placeholder = PROVIDER_PLACEHOLDERS[p] || 'Enter API keyu2026';
+  const meta = PROVIDERS_META[p] || {};
+  document.getElementById('api-key').placeholder = meta.placeholder || 'Enter API key';
   document.getElementById('custom-url-row').style.display = p === 'custom' ? 'block' : 'none';
+  // Set suggested model
+  const modelInput = document.getElementById('model-input');
+  if (!modelInput.value || Object.values(PROVIDERS_META).some(m => m.model === modelInput.value)) {
+    modelInput.value = meta.model || '';
+  }
+  modelInput.placeholder = meta.model || 'auto';
+  // Show hints
+  document.getElementById('provider-hint').textContent = meta.hint || '';
   checkReady();
 }
 
@@ -910,6 +929,8 @@ function getProviderPayload() {
     const url = document.getElementById('custom-url').value.trim();
     if (url) payload.base_url = url;
   }
+  const model = document.getElementById('model-input').value.trim();
+  if (model) payload.model = model;
   return payload;
 }
 
@@ -939,6 +960,7 @@ function buildPersonaGrid() {
 }
 
 buildPersonaGrid();
+onProviderChange(); // set initial placeholder/model/hint
 
 // ============ PERSONA SELECTION ============
 function selectPersona(p) {

@@ -24,7 +24,7 @@ _service = BuilderService(generator=_generator, validator=_validator)
 def generate_profile(request: GenerateRequest):
     base_url = resolve_base_url(request.provider, request.base_url or "")
     try:
-        return _service.generate_single(request.persona, request.api_key, base_url)
+        return _service.generate_single(request.persona, request.api_key, base_url, request.model or "")
     except InvalidPersonaError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:

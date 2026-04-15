@@ -11,7 +11,7 @@ from src.config.llm_config import (
     EXTRACTION_MAX_TOKENS,
     EXTRACTION_MODEL,
     EXTRACTION_TEMPERATURE,
-    create_client,
+    create_client,  # noqa: F401 — re-exported for test mocking
 )
 from src.generator.prompts.extraction_prompt import EXTRACTION_SYSTEM_PROMPT
 
@@ -52,12 +52,14 @@ class ConstraintValidator:
         llm_soft_constraints: SoftConstraints,
         api_key: str,
         base_url: str = "",
+        model: str = "",
     ) -> ValidationReport:
         """Run extraction on limitationInstructions, diff against llm_soft_constraints."""
         client = create_client(api_key, base_url)
+        effective_model = model or EXTRACTION_MODEL
         try:
             response = client.chat.completions.create(
-                model=EXTRACTION_MODEL,
+                model=effective_model,
                 messages=[
                     {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
                     {"role": "user", "content": limitation_instructions},

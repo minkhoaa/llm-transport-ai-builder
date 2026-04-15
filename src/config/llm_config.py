@@ -5,27 +5,28 @@ from openai import OpenAI
 
 # --- Provider registry ---
 PROVIDER_URLS: dict[str, str] = {
-    "groq":      "https://api.groq.com/openai/v1",
-    "openai":    "https://api.openai.com/v1",
-    "minimax":   "https://api.minimax.chat/v1",
-    "together":  "https://api.together.xyz/v1",
-    "fireworks": "https://api.fireworks.ai/inference/v1",
-    "deepseek":  "https://api.deepseek.com/v1",
-    "openrouter":"https://openrouter.ai/api/v1",
+    "9router":    "http://localhost:20128/v1",
+    "groq":       "https://api.groq.com/openai/v1",
+    "openai":     "https://api.openai.com/v1",
+    "minimax":    "https://api.minimax.chat/v1",
+    "together":   "https://api.together.xyz/v1",
+    "fireworks":  "https://api.fireworks.ai/inference/v1",
+    "deepseek":   "https://api.deepseek.com/v1",
+    "openrouter": "https://openrouter.ai/api/v1",
 }
 
-# Env-level defaults (used when caller passes no api_key / no base_url)
+# Env-level defaults
 _API_KEY_ENV: str = os.getenv("API_KEY", "")
 BASE_URL: str = os.getenv("BASE_URL", PROVIDER_URLS["groq"])
 
-# --- LLM constants ---
-GENERATION_MODEL = "openai/gpt-oss-120b"
-GENERATION_TEMPERATURE = 0.7
-GENERATION_MAX_TOKENS = 2000
+# Models — read from env, with sensible fallbacks
+GENERATION_MODEL: str = os.getenv("GENERATION_MODEL", "openai/gpt-oss-120b")
+GENERATION_TEMPERATURE: float = 0.7
+GENERATION_MAX_TOKENS: int = 2000
 
-EXTRACTION_MODEL = "openai/gpt-oss-120b"
-EXTRACTION_TEMPERATURE = 0.1
-EXTRACTION_MAX_TOKENS = 1500
+EXTRACTION_MODEL: str = os.getenv("EXTRACTION_MODEL", "openai/gpt-oss-120b")
+EXTRACTION_TEMPERATURE: float = 0.1
+EXTRACTION_MAX_TOKENS: int = 1500
 
 
 def resolve_base_url(provider: str, custom_url: str = "") -> str:

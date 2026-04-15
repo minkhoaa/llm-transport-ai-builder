@@ -223,6 +223,7 @@ class GenerateRequest(BaseModel):
     api_key: str
     provider: str = "groq"          # known key from PROVIDER_URLS, or "custom"
     base_url: Optional[str] = None  # only used when provider="custom"
+    model: Optional[str] = None     # overrides GENERATION_MODEL env var when set
 
 
 class BatchGenerateRequest(BaseModel):
@@ -232,6 +233,7 @@ class BatchGenerateRequest(BaseModel):
     api_key: str
     provider: str = "groq"
     base_url: Optional[str] = None
+    model: Optional[str] = None
 
     @model_validator(mode="after")
     def check_persona_source(self) -> "BatchGenerateRequest":
