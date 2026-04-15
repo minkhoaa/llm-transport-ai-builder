@@ -11,6 +11,14 @@ from pydantic import BaseModel, Field, field_validator, model_validator, model_s
 
 JobType = Literal["MOV", "WH", "HHG"]
 
+Rating = Literal[
+    "1 - Poor",
+    "2 - Needs Improvement",
+    "3 - Standard",
+    "4 - Above Average",
+    "5 - Exceptional",
+]
+
 
 # --- Company reference ---
 
@@ -33,7 +41,7 @@ class EmployeeProfile(BaseModel):
 
     name: str
     priority: Literal["Regular", "Part-Time", "Extras"]
-    rating: int = Field(ge=1, le=5)
+    rating: Rating
     prefHrs: int = Field(ge=0, le=168)
     mondayAm: bool
     mondayPm: bool

@@ -8,7 +8,7 @@ from src.generator.persona_generator import PersonaGenerator, InvalidPersonaErro
 
 VALID_PAYLOAD = {
     "employee": {
-        "id": None, "name": "Tom Nguyen", "priority": "Regular", "rating": 3, "prefHrs": 40,
+        "id": None, "name": "Tom Nguyen", "priority": "Regular", "rating": "3 - Standard", "prefHrs": 40,
         "mondayAm": False, "mondayPm": True, "tuesdayAm": False, "tuesdayPm": True,
         "wednesdayAm": False, "wednesdayPm": True, "thursdayAm": False, "thursdayPm": True,
         "fridayAm": False, "fridayPm": True, "saturdayAm": False, "saturdayPm": False,

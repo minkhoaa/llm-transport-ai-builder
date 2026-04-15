@@ -12,7 +12,7 @@ from src.generator.persona_generator import InvalidPersonaError, GenerationError
 def _make_payload():
     return FullPayload(
         employee=EmployeeProfile(
-            name="Test User", priority="Regular", rating=3, prefHrs=40,
+            name="Test User", priority="Regular", rating="3 - Standard", prefHrs=40,
             mondayAm=True, mondayPm=True, tuesdayAm=True, tuesdayPm=True,
             wednesdayAm=True, wednesdayPm=True, thursdayAm=True, thursdayPm=True,
             fridayAm=True, fridayPm=True, saturdayAm=False, saturdayPm=False,

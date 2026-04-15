@@ -13,7 +13,7 @@ from src.api.schemas.payload import (
 
 def make_employee(**overrides):
     base = {
-        "name": "Jane Doe", "priority": "Regular", "rating": 3, "prefHrs": 40,
+        "name": "Jane Doe", "priority": "Regular", "rating": "3 - Standard", "prefHrs": 40,
         "mondayAm": True, "mondayPm": True, "tuesdayAm": True, "tuesdayPm": True,
         "wednesdayAm": True, "wednesdayPm": True, "thursdayAm": True, "thursdayPm": True,
         "fridayAm": True, "fridayPm": True, "saturdayAm": False, "saturdayPm": False,
@@ -36,11 +36,18 @@ def test_employee_priority_invalid():
         EmployeeProfile(**make_employee(priority="Full-Time"))
 
 
-def test_employee_rating_bounds():
+def test_employee_rating_valid_labels():
+    from src.api.schemas.payload import Rating
+    for label in ("1 - Poor", "2 - Needs Improvement", "3 - Standard", "4 - Above Average", "5 - Exceptional"):
+        e = EmployeeProfile(**make_employee(rating=label))
+        assert e.rating == label
+
+
+def test_employee_rating_invalid_label():
     with pytest.raises(ValidationError):
-        EmployeeProfile(**make_employee(rating=6))
+        EmployeeProfile(**make_employee(rating="3"))  # bare integer string
     with pytest.raises(ValidationError):
-        EmployeeProfile(**make_employee(rating=0))
+        EmployeeProfile(**make_employee(rating=3))    # raw int
 
 
 def test_employee_personalities_is_list():

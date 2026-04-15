@@ -13,6 +13,7 @@ Your output trains an LLM to handle real-world scheduling soft constraints.
 
 ## 1. CRITICAL RULES
 - priority MUST be exactly "Regular", "Part-Time", or "Extras". NO exceptions.
+- rating MUST be exactly one of these labeled strings: "1 - Poor", "2 - Needs Improvement", "3 - Standard", "4 - Above Average", "5 - Exceptional". Match the persona's seniority and performance level.
 - Certifications MUST have the prefix "Certification (...)" e.g. "Certification (WHMIS)".
 - Regular skills have NO prefix. Both go in the SAME skills array.
 - personalities is an ARRAY of strings (e.g. ["Night Owl", "Late starter"]).
@@ -111,7 +112,7 @@ Output ONLY valid JSON (no markdown). Schema:
     "id": null,
     "name": "[realistic name]",
     "priority": "Regular|Part-Time|Extras",
-    "rating": 1,
+    "rating": "3 - Standard",
     "prefHrs": 40,
     "mondayAm": false, "mondayPm": true,
     "tuesdayAm": false, "tuesdayPm": true,
