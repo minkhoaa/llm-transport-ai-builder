@@ -4,7 +4,9 @@ from __future__ import annotations
 import uuid
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Any
+
+from pydantic import BaseModel, Field, field_validator, model_validator, model_serializer
 
 
 JobType = Literal["MOV", "WH", "HHG"]
@@ -176,6 +178,11 @@ class SoftConstraints(BaseModel):
     jobTypeRestrictions: Optional[JobTypeRestrictions] = None
     vehicleRestrictions: List[VehicleRestriction] = []
     interpersonalConflicts: List[InterpersonalConflict] = []
+
+    @model_serializer(mode="wrap")
+    def exclude_empty(self, handler: Any) -> dict[str, Any]:
+        data = handler(self)
+        return {k: v for k, v in data.items() if v is not None and v != []}
 
 
 # --- Full payload ---
