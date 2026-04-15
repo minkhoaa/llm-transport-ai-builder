@@ -44,10 +44,10 @@ class PersonaGenerator:
             )
 
     def generate(
-        self, persona: str, api_key: str, *, max_retries: int = 3
+        self, persona: str, api_key: str, *, base_url: str = "", max_retries: int = 3
     ) -> tuple[FullPayload, int]:
         """Call LLM to generate a FullPayload. Returns (payload, attempts_used)."""
-        client = create_client(api_key)
+        client = create_client(api_key, base_url)
         last_error: str | None = None
 
         for attempt in range(1, max_retries + 1):

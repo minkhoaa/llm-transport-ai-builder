@@ -221,6 +221,8 @@ class ValidationReport(BaseModel):
 class GenerateRequest(BaseModel):
     persona: str
     api_key: str
+    provider: str = "groq"          # known key from PROVIDER_URLS, or "custom"
+    base_url: Optional[str] = None  # only used when provider="custom"
 
 
 class BatchGenerateRequest(BaseModel):
@@ -228,6 +230,8 @@ class BatchGenerateRequest(BaseModel):
     persona: Optional[str] = None
     count: int = Field(default=1, ge=1, le=20)
     api_key: str
+    provider: str = "groq"
+    base_url: Optional[str] = None
 
     @model_validator(mode="after")
     def check_persona_source(self) -> "BatchGenerateRequest":

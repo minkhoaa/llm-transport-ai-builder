@@ -173,6 +173,11 @@
   .api-key-input::placeholder { color: var(--text-muted); }
   .api-key-input:focus { border-color: var(--amber-dim); }
 
+  select.api-key-input { appearance: none; padding-right: 24px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7f99'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center; }
+  select.api-key-input option { background: #0d1220; color: #c8d6e8; }
+
   .api-key-toggle {
     position: absolute;
     right: 8px;
@@ -732,11 +737,29 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
 
+    <!-- Provider -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Provider</div>
+      <select class="api-key-input" id="provider" onchange="onProviderChange()" style="cursor:pointer">
+        <option value="groq">Groq</option>
+        <option value="openai">OpenAI</option>
+        <option value="minimax">MiniMax</option>
+        <option value="together">Together AI</option>
+        <option value="fireworks">Fireworks AI</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="openrouter">OpenRouter</option>
+        <option value="custom">Customu2026</option>
+      </select>
+      <div id="custom-url-row" style="display:none;margin-top:6px">
+        <input type="text" class="api-key-input" id="custom-url" placeholder="https://u2026/v1" autocomplete="off">
+      </div>
+    </div>
+
     <!-- API Key -->
     <div class="sidebar-section">
       <div class="sidebar-label">API Key</div>
       <div class="api-key-wrap">
-        <input type="password" class="api-key-input" id="api-key" placeholder="gsk_..." autocomplete="off">
+        <input type="password" class="api-key-input" id="api-key" placeholder="Enter API keyu2026" autocomplete="off">
         <button class="api-key-toggle" id="api-key-toggle" onclick="toggleApiKey()">ud83dudc41</button>
       </div>
     </div>
@@ -771,8 +794,9 @@
     <!-- Hint -->
     <div style="padding: 12px 16px;">
       <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);line-height:1.7">
+        <div>u2192 Pick a provider</div>
+        <div>u2192 Enter the API key for that provider</div>
         <div>u2192 Select a persona from the grid</div>
-        <div>u2192 Enter your Groq API key</div>
         <div>u2192 Choose single or batch mode</div>
         <div>u2192 Hit GENERATE</div>
       </div>
@@ -859,6 +883,35 @@ const PERSONAS = [
   { id: 26, name: 'Summer Help',               icon: 'u2600ufe0f' },
   { id: 27, name: 'Apprentice',               icon: 'ud83dudd28' },
 ];
+
+// ============ PROVIDERS ============
+const PROVIDER_PLACEHOLDERS = {
+  groq:       'gsk_u2026',
+  openai:     'sk-u2026',
+  minimax:    'eyJu2026',
+  together:   'Enter Together API keyu2026',
+  fireworks:  'Enter Fireworks API keyu2026',
+  deepseek:   'Enter DeepSeek API keyu2026',
+  openrouter: 'sk-or-u2026',
+  custom:     'Enter API keyu2026',
+};
+
+function onProviderChange() {
+  const p = document.getElementById('provider').value;
+  document.getElementById('api-key').placeholder = PROVIDER_PLACEHOLDERS[p] || 'Enter API keyu2026';
+  document.getElementById('custom-url-row').style.display = p === 'custom' ? 'block' : 'none';
+  checkReady();
+}
+
+function getProviderPayload() {
+  const provider = document.getElementById('provider').value;
+  const payload = { provider };
+  if (provider === 'custom') {
+    const url = document.getElementById('custom-url').value.trim();
+    if (url) payload.base_url = url;
+  }
+  return payload;
+}
 
 // ============ STATE ============
 let selectedPersona = null;
@@ -969,7 +1022,7 @@ async function generateSingle(apiKey) {
   const resp = await fetch('/builder/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ persona: selectedPersona.name, api_key: apiKey }),
+    body: JSON.stringify({ persona: selectedPersona.name, api_key: apiKey, ...getProviderPayload() }),
   });
 
   if (!resp.ok) {
@@ -992,7 +1045,7 @@ async function generateBatch(apiKey) {
   const resp = await fetch('/builder/generate/batch', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ persona: selectedPersona.name, count: batchCount, api_key: apiKey }),
+    body: JSON.stringify({ persona: selectedPersona.name, count: batchCount, api_key: apiKey, ...getProviderPayload() }),
   });
 
   if (!resp.ok) {

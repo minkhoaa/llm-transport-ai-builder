@@ -51,9 +51,10 @@ class ConstraintValidator:
         limitation_instructions: str,
         llm_soft_constraints: SoftConstraints,
         api_key: str,
+        base_url: str = "",
     ) -> ValidationReport:
         """Run extraction on limitationInstructions, diff against llm_soft_constraints."""
-        client = create_client(api_key)
+        client = create_client(api_key, base_url)
         try:
             response = client.chat.completions.create(
                 model=EXTRACTION_MODEL,
