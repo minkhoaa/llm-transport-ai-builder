@@ -185,6 +185,18 @@ class InterpersonalConflict(BaseModel):
     softConstraint: bool
 
 
+class PhysicalRestrictions(BaseModel):
+    """Medical/physical constraints not expressible via scheduling categories."""
+    maxLiftKg: Optional[int] = None
+    # suggested values: "stair_carry", "heavy_carry", "overhead_work",
+    #                   "heavy_equipment_operation", "repetitive_lifting"
+    bannedTasks: Optional[List[str]] = None
+    # suggested values: "dusty", "chemical", "outdoor", "cold_storage"
+    restrictedEnvironments: Optional[List[str]] = None
+    dutyLevel: Literal["light", "medium", "full"] = "full"
+    noteSummary: str = ""
+
+
 # --- SoftConstraints aggregate ---
 
 class SoftConstraints(BaseModel):
@@ -200,6 +212,7 @@ class SoftConstraints(BaseModel):
     jobTypeRestrictions: Optional[JobTypeRestrictions] = None
     vehicleRestrictions: List[VehicleRestriction] = []
     interpersonalConflicts: List[InterpersonalConflict] = []
+    physicalRestrictions: Optional[PhysicalRestrictions] = None
 
     @model_serializer(mode="wrap")
     def exclude_empty(self, handler: Any) -> dict[str, Any]:

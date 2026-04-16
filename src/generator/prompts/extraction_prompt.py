@@ -44,6 +44,30 @@ Example structure (omit any field not applicable):
   "interpersonalConflicts": [{"conflictEmployeeName": "John Smith", "conflictType": "cannot_work_together", "softConstraint": false}]
 }
 
+physicalRestrictions captures medical/physical limitations that cannot be expressed as scheduling rules:
+  - "no lifting" / "light duty" → dutyLevel: "light"
+  - "no heavy lifting" / "limited carry" → maxLiftKg: [number]
+  - "no stair carries" → bannedTasks: ["stair_carry"]
+  - "no heavy carry" → bannedTasks: ["heavy_carry"]
+  - "no overhead work" → bannedTasks: ["overhead_work"]
+  - "no operating heavy equipment" → bannedTasks: ["heavy_equipment_operation"]
+  - "no repetitive lifting" → bannedTasks: ["repetitive_lifting"]
+  - "no chemical exposure" / "chemical allergies" → restrictedEnvironments: ["chemical"]
+  - "no dust exposure" / "dust allergies" → restrictedEnvironments: ["dusty"]
+  - "no outdoor work" → restrictedEnvironments: ["outdoor"]
+  - "no cold storage" → restrictedEnvironments: ["cold_storage"]
+  - noteSummary: brief description of the physical limitation (1-2 sentences)
+
+Example:
+{
+  "physicalRestrictions": {
+    "maxLiftKg": 10,
+    "bannedTasks": ["stair_carry", "heavy_carry"],
+    "dutyLevel": "light",
+    "noteSummary": "Returning from back surgery — no heavy lifting or stair carries until cleared by physician."
+  }
+}
+
 Rules:
 - Extract ONLY what is clearly stated in the text.
 - "Must not" / "Never" -> hard constraint (softConstraint: false where applicable).

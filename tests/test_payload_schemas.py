@@ -107,6 +107,7 @@ from src.api.schemas.payload import (
     ValidationReport,
     PartialLimitation,
     PartialPayload,
+    PhysicalRestrictions,
 )
 
 
@@ -167,3 +168,58 @@ def test_partial_payload_no_soft_constraints():
         skills=["Heavy Carry"],
     )
     assert not hasattr(pp, "softConstraints")
+
+
+def test_physical_restrictions_defaults():
+    pr = PhysicalRestrictions()
+    assert pr.dutyLevel == "full"
+    assert pr.noteSummary == ""
+    assert pr.maxLiftKg is None
+    assert pr.bannedTasks is None
+    assert pr.restrictedEnvironments is None
+
+
+def test_physical_restrictions_duty_level_valid():
+    for level in ("light", "medium", "full"):
+        pr = PhysicalRestrictions(dutyLevel=level)
+        assert pr.dutyLevel == level
+
+
+def test_physical_restrictions_duty_level_invalid():
+    with pytest.raises(ValidationError):
+        PhysicalRestrictions(dutyLevel="none")
+
+
+def test_physical_restrictions_full_fields():
+    pr = PhysicalRestrictions(
+        maxLiftKg=10,
+        bannedTasks=["stair_carry", "heavy_carry"],
+        restrictedEnvironments=["dusty", "chemical"],
+        dutyLevel="light",
+        noteSummary="Back injury — no heavy lifting.",
+    )
+    assert pr.maxLiftKg == 10
+    assert "stair_carry" in pr.bannedTasks
+    assert pr.dutyLevel == "light"
+
+
+def test_soft_constraints_with_physical_restrictions():
+    from src.api.schemas.payload import SoftConstraints
+    sc = SoftConstraints(
+        physicalRestrictions=PhysicalRestrictions(
+            dutyLevel="light",
+            bannedTasks=["stair_carry"],
+            noteSummary="Knee injury.",
+        )
+    )
+    serialized = sc.model_dump()
+    assert "physicalRestrictions" in serialized
+    assert serialized["physicalRestrictions"]["dutyLevel"] == "light"
+
+
+def test_soft_constraints_excludes_empty_physical_restrictions():
+    from src.api.schemas.payload import SoftConstraints
+    # physicalRestrictions with all-None fields — should still serialize if present
+    sc = SoftConstraints()
+    serialized = sc.model_dump()
+    assert "physicalRestrictions" not in serialized  # excluded because None

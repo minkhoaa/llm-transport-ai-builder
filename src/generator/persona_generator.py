@@ -21,6 +21,7 @@ from src.api.schemas.payload import (
     LeadershipRestriction,
     LimitationProfile,
     PartialPayload,
+    PhysicalRestrictions,
     RecurringTimeOffPattern,
     SoftConstraints,
     VehicleRestriction,
@@ -67,6 +68,7 @@ _OBJECT_MODELS: list[tuple[str, type]] = [
     ("dailyTimeRestrictions", DailyTimeRestrictions),
     ("crewSizeRestrictions", CrewSizeRestrictions),
     ("jobTypeRestrictions", JobTypeRestrictions),
+    ("physicalRestrictions", PhysicalRestrictions),
 ]
 
 

@@ -85,11 +85,11 @@ Output JSON structure:
 17. Night School Student: Evening classes, works mostly days.
 18. Volunteer: Suddenly appears and disappears, can do many work variants.
 19. Gym Fanatic: Morning/evening workouts must be respected, can lift heavy.
-20. Injury-Returning (Back): Back injury, light duty only.
-21. Injury-Returning (Knee): Knee surgery, no stairs/lifting.
+20. Injury-Returning (Back): Back injury, light duty only. limitationInstructions must include physical restrictions (no heavy lifting, no stair carries).
+21. Injury-Returning (Knee): Knee surgery, no stairs/lifting. limitationInstructions must include physical restrictions (no stair carries, no heavy equipment).
 22. Diabetic (Meal Timing): Needs regular meal breaks, predictable hours.
 23. Chronic Fatigue: Cannot do long/consecutive shifts, must give advance notice.
-24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites.
+24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites. limitationInstructions must include restricted environments (chemical, dusty).
 25. Eager Rookie: No skills but says yes to everything, needs constant supervision.
 26. Summer Help: Seasonal student, can only work certain months.
 27. Apprentice: Must always be paired with a mentor.
