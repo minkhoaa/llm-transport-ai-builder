@@ -75,7 +75,7 @@ Output JSON structure:
 4. Caregiver of aging parents: Unpredictable emergencies, parent appointments.
 5. Religious catholic worker: Sabbath/Friday prayers off.
 6. Part-Time Student: Avoids class schedule, basic skills, needs training.
-7. Night Owl: Prefers nights, bad performance mornings.
+7. Night Owl: Prefers nights, bad performance mornings. limitationInstructions must describe ADDITIONAL constraints (e.g. max consecutive night shifts, cross-day dependencies after nights) — do NOT write "no morning shifts" or "no weekend shifts" since those are already expressed by the false AM/PM booleans.
 8. Early Bird: Wants mornings only, goes to bed at 9pm. limitationInstructions MUST use endTimeBefore (e.g. "Must not schedule any shift that ends after 12:00") to express the morning-only constraint — do NOT write "must not start after HH:MM" (that semantically inverts the schema field).
 9. Weekend Warrior: Has weekday job elsewhere. limitationInstructions must use simple schema-mappable constraints such as dailyTimeRestrictions (max hours per day on weekends), weeklyFrequencyLimits (max shifts per week), or crossDayDependencies — do NOT write multi-condition rules like "crews larger than N without advance notice".
 10. Cranky Old-Timer: Opinionated, doesn't get along with certain people.
