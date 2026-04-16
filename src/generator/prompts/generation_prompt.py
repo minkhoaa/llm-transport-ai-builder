@@ -46,7 +46,8 @@ Rating MUST match the persona:
 - lovedByCompanies and hatedByCompanies MUST use ONLY clients from Section 2 below.
 - preferredJobTypes and avoidedJobTypes MUST use ONLY these three values: "MOV", "WH", "HHG".
 - preferredJobTypes and avoidedJobTypes MUST NOT overlap.
-- limitationInstructions MUST mention 2-3 constraints using "Must not" (hard) or "Try not to" (soft).
+- limitationInstructions MUST mention 2-3 constraints, but they should read like a real human-written dispatcher/manager note rather than policy language.
+- The meaning of each constraint must still be obvious enough that another scheduler could read it once and understand the limitation immediately.
 - prefHrs MUST be consistent with AM/PM availability: each true AM or PM slot ≈ 5 hours capacity.
   A worker with only 2 true slots can work at most 10h/week — prefHrs must not exceed slots × 5.
   Examples: 2 slots → prefHrs ≤ 10 | 5 slots → prefHrs ≤ 25 | 8 slots → prefHrs ≤ 40 | 14 slots → prefHrs ≤ 70.
@@ -89,7 +90,7 @@ Output JSON structure:
   "employee": {{ ... }},
   "skills": [ ... ],
   "limitation": {{
-    "limitationInstructions": "natural language text with Must not / Try not to"
+    "limitationInstructions": "natural human-written scheduling note with clear limitations"
   }}
 }}
 
@@ -101,16 +102,52 @@ Output JSON structure:
 - preferredJobTypes and avoidedJobTypes must not overlap
 - Output ONLY valid JSON (no markdown, no explanation outside JSON)
 
-## 7. THE 27 PERSONA DICTIONARY
+## 7. LIMITATION INSTRUCTIONS STYLE GUIDE
+limitationInstructions must sound like a real dispatcher, coordinator, site lead, or manager wrote them — not legal policy text, not robotic prompt language.
+
+Rules:
+- Write 1-3 sentences with 2-3 clear limitations woven in naturally
+- Sound human: blunt, practical, warm, tired, direct, matter-of-fact, or conversational
+- Vary rhythm: some outputs should be short and clipped, others more detailed and explanatory
+- Vary sentence shape: fragments, paired clauses, observations, warnings, casual reminders, quick explanations
+- Multicultural flavor is good when it feels natural in tone and rhythm, but NEVER stereotype or caricature
+- Do NOT make every note sound like "Must not... Must not... Try not to..."
+- You MAY use any wording a real person would use: "doesn't do well with...", "keep him off...", "fine as long as...", "late finishes are rough", "better if...", "not a great fit for...", "works best when...", "give her a heads-up", etc.
+- The wording can be natural, but the underlying constraint must still be unmistakable
+- Do NOT turn it into a generic personality summary — it still needs to communicate actual scheduling limitations
+
+Style variety — rotate styles aggressively:
+
+Short / blunt:
+- "Late finishes don't work for her — keep her wrapped by 6."
+- "Back-to-back nights are a bad idea. He fades fast."
+- "Fine on site, just keep him off the heavy carry stuff."
+
+Practical / scheduler voice:
+- "She's solid if the day stays predictable. Once the shift runs long, that's where things start slipping."
+- "He can do the work, just not stairs and not the heavier equipment right now."
+- "Weekend jobs are doable, but only with enough notice — same-day usually won't happen."
+
+Conversational / human:
+- "Put her on mornings and you're golden. Evenings are where it goes sideways."
+- "He's okay as long as nobody tries to make him play hero with the lifting."
+- "She'll usually say yes, but if you stack too much into one day you'll feel it the next morning."
+
+Detailed / explanatory:
+- "The issue isn't the shift itself — it's when it drags past the point he can plan around meals. Keep it predictable and don't let it bleed into the evening."
+- "She's still reliable, just not for the jobs that need repeated stair carries or long stretches of heavier physical work."
+- "He works well with the right lead, but anything that throws him into a vehicle or puts him in charge too early is setting him up to struggle."
+
+## 8. THE 27 PERSONA DICTIONARY
 1. Veteran Lead: High performer, crew chief, company face.
 2. Senior worker: Highly paid, advanced skills, specialized, trainer.
 3. Family-First Parent: Has kids, avoids school pickups, kids activities.
 4. Caregiver of aging parents: Unpredictable emergencies, parent appointments.
 5. Religious catholic worker: Sabbath/Friday prayers off.
 6. Part-Time Student: Avoids class schedule, basic skills, needs training.
-7. Night Owl: Prefers nights, bad performance mornings. All AM booleans false; PM true Mon–Fri only → 5 slots → prefHrs ≤ 25. limitationInstructions must describe ADDITIONAL constraints (e.g. max consecutive night shifts, cross-day dependencies after nights) — do NOT write "no morning shifts" or "no weekend shifts" since those are already expressed by the false AM/PM booleans.
-8. Early Bird: Wants mornings only, goes to bed at 9pm. All PM booleans false; AM true Mon–Fri only → 5 slots → prefHrs ≤ 25. limitationInstructions MUST use endTimeBefore (e.g. "Must not schedule any shift that ends after 12:00") to express the morning-only constraint — do NOT write "must not start after HH:MM" (that semantically inverts the schema field).
-9. Weekend Warrior: Has weekday job elsewhere. limitationInstructions must use simple schema-mappable constraints such as dailyTimeRestrictions (max hours per day on weekends), weeklyFrequencyLimits (max shifts per week), or crossDayDependencies — do NOT write multi-condition rules like "crews larger than N without advance notice".
+7. Night Owl: Prefers nights, bad performance mornings. All AM booleans false; PM true Mon–Fri only → 5 slots → prefHrs ≤ 25. limitationInstructions should describe ADDITIONAL night-related constraints (e.g. too many night shifts in a row, rough next-morning recovery) — do NOT waste the note repeating "no mornings" or "no weekends" since availability already shows that.
+8. Early Bird: Wants mornings only, goes to bed at 9pm. All PM booleans false; AM true Mon–Fri only → 5 slots → prefHrs ≤ 25. limitationInstructions should naturally make it clear that late-finishing shifts do not work for this person, which should map to an endTimeBefore-style constraint.
+9. Weekend Warrior: Has weekday job elsewhere. limitationInstructions should stay simple and scheduler-readable, centered on weekend capacity, frequency, daily hours, or recovery impact — avoid tangled multi-condition rules.
 10. Cranky Old-Timer: Opinionated, doesn't get along with certain people.
 11. Pair bonded: Works best with some partners at some jobs.
 12. Injury-Returning Worker: Serious injury, light duty only.
@@ -121,16 +158,16 @@ Output JSON structure:
 17. Night School Student: Evening classes, works mostly days.
 18. Volunteer: Suddenly appears and disappears, can do many work variants.
 19. Gym Fanatic: Morning/evening workouts must be respected, can lift heavy.
-20. Injury-Returning (Back): Back injury, light duty only. limitationInstructions must include physical restrictions (no heavy lifting, no stair carries).
-21. Injury-Returning (Knee): Knee surgery, no stairs/lifting. limitationInstructions must include physical restrictions (no stair carries, no heavy equipment).
-22. Diabetic (Meal Timing): Needs regular meal breaks, predictable hours. limitationInstructions must use direct time constraints (e.g. "Must not schedule any shift longer than 5 hours", "Must not schedule shifts that start before 08:00 or end after 18:00") — do NOT write "without a break" or break-interval language.
+20. Injury-Returning (Back): Back injury, light duty only. limitationInstructions should clearly communicate physical restrictions such as no heavy lifting or stair carries, but in natural human wording.
+21. Injury-Returning (Knee): Knee surgery, no stairs/lifting. limitationInstructions should clearly communicate no stair carries and no heavy equipment, but in natural human wording.
+22. Diabetic (Meal Timing): Needs regular meal breaks, predictable hours. limitationInstructions should naturally but clearly imply concrete time boundaries like shorter shifts, not-too-early starts, and not-too-late finishes — avoid vague wording that only mentions "breaks" without schedule implications.
 23. Chronic Fatigue: Cannot do long/consecutive shifts, must give advance notice.
-24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites. limitationInstructions must phrase restrictions as environment types (e.g. "chemical environments", "dusty sites", "sites with heavy dust or chemical exposure") — do NOT list specific substances like spray paint or adhesives.
+24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites. limitationInstructions should phrase restrictions as environment types (e.g. chemical environments, dusty sites, heavy dust exposure) in natural wording — do NOT list narrow substances like spray paint or adhesives.
 25. Eager Rookie: No skills but says yes to everything, needs constant supervision.
 26. Summer Help: Seasonal student, can only work certain months.
 27. Apprentice: Must always be paired with a mentor.
 
-## 8. ADDITIONAL NOTES STYLE GUIDE
+## 9. ADDITIONAL NOTES STYLE GUIDE
 additionalNotes must sound like a real dispatcher jotted it down — casual, personal, useful to other schedulers.
 
 Rules:
@@ -171,7 +208,7 @@ Dry/cultural flavor:
 - "She'll do the job right the first time, no question. Just don't expect small talk."
 - "Good energy on site. The younger crew tends to follow his lead naturally."
 
-## 9. FULL OUTPUT EXAMPLE
+## 10. FULL OUTPUT EXAMPLE
 Output ONLY valid JSON. Schema:
 {{
   "_reasoning": {{
