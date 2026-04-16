@@ -86,7 +86,7 @@ def _parse_soft_constraints_lenient(data: dict) -> SoftConstraints:
                 model_cls.model_validate(item)
                 valid_items.append(item)
             except (ValidationError, Exception) as exc:
-                logger.warning(f"Call 2: dropping invalid {field} item u2014 {exc}")
+                logger.warning(f"Call 2: dropping invalid {field} item — {exc}")
         if valid_items:
             cleaned[field] = valid_items
 
@@ -98,7 +98,7 @@ def _parse_soft_constraints_lenient(data: dict) -> SoftConstraints:
             model_cls.model_validate(raw_obj)
             cleaned[field] = raw_obj
         except (ValidationError, Exception) as exc:
-            logger.warning(f"Call 2: dropping invalid {field} u2014 {exc}")
+            logger.warning(f"Call 2: dropping invalid {field} — {exc}")
 
     return SoftConstraints(**cleaned)
 
@@ -210,7 +210,7 @@ class PersonaGenerator:
                         "role": "user",
                         "content": (
                             f"Your output had validation errors: {last_ext_error}\n"
-                            "Fix the invalid values u2014 check the STRICT ENUM VALUES section u2014 "
+                            "Fix the invalid values — check the STRICT ENUM VALUES section — "
                             "and output corrected JSON."
                         ),
                     },
@@ -236,7 +236,7 @@ class PersonaGenerator:
                 last_ext_error = str(exc)
                 logger.warning(f"Call 2 attempt {ext_attempt} failed: {exc}")
                 if ext_attempt == _CALL2_MAX_RETRIES:
-                    logger.warning("Call 2 exhausted retries u2014 using empty SoftConstraints")
+                    logger.warning("Call 2 exhausted retries — using empty SoftConstraints")
 
         # --- Assemble full payload ---
         payload = FullPayload(

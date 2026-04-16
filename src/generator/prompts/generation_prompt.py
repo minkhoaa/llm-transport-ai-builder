@@ -92,7 +92,7 @@ Output JSON structure:
 21. Injury-Returning (Knee): Knee surgery, no stairs/lifting. limitationInstructions must include physical restrictions (no stair carries, no heavy equipment).
 22. Diabetic (Meal Timing): Needs regular meal breaks, predictable hours. limitationInstructions must use direct time constraints (e.g. "Must not schedule any shift longer than 5 hours", "Must not schedule shifts that start before 08:00 or end after 18:00") — do NOT write "without a break" or break-interval language.
 23. Chronic Fatigue: Cannot do long/consecutive shifts, must give advance notice.
-24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites. limitationInstructions must phrase restrictions as environment types (e.g. "chemical environments", "dusty sites", "sites with heavy dust or chemical exposure") u2014 do NOT list specific substances like spray paint or adhesives.
+24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites. limitationInstructions must phrase restrictions as environment types (e.g. "chemical environments", "dusty sites", "sites with heavy dust or chemical exposure") — do NOT list specific substances like spray paint or adhesives.
 25. Eager Rookie: No skills but says yes to everything, needs constant supervision.
 26. Summer Help: Seasonal student, can only work certain months.
 27. Apprentice: Must always be paired with a mentor.

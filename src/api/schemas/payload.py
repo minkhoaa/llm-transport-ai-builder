@@ -97,7 +97,7 @@ class EmployeeProfile(BaseModel):
         if self.prefHrs > max_hrs:
             raise ValueError(
                 f"prefHrs ({self.prefHrs}) exceeds weekly availability: "
-                f"{slots} slot(s) \u00d7 {HOURS_PER_SLOT}h = {max_hrs}h max. "
+                f"{slots} slot(s) \× {HOURS_PER_SLOT}h = {max_hrs}h max. "
                 f"Lower prefHrs or enable more AM/PM slots."
             )
         return self
