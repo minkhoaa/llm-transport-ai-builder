@@ -1716,7 +1716,11 @@ const ASSIGNED_TO = { _id: '69cf64291c12ff47e0ecc6bd', email: 'tukhoa040505@gmai
 
 async function autoPushIfPassed(data) {
   const validation = data.validation;
-  if (!validation || !validation.passed) return;
+  console.log('[auto-push] validation:', validation);
+  if (!validation || !validation.passed) {
+    console.log('[auto-push] skipped — not passed');
+    return;
+  }
   const payload = data.payload || data;
   const newName = payload.employee?.name;
 
@@ -1724,6 +1728,7 @@ async function autoPushIfPassed(data) {
     // Check for duplicate name
     const existing = await fetch(CREW_PROFILES_URL).then(r => r.json());
     const duplicate = existing.some(p => p.employee?.name === newName);
+    console.log('[auto-push] name:', newName, '| duplicate:', duplicate);
     if (duplicate) {
       showToast(`Skipped: "${newName}" already exists`, 'error');
       return;
