@@ -705,6 +705,303 @@
     margin-bottom: 6px;
     display: block;
   }
+
+  /* ============ 9ROUTER MODAL ============ */
+  .nr-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,6,10,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .nr-overlay.open { opacity: 1; pointer-events: all; }
+
+  .nr-modal {
+    background: var(--bg-1);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    width: 520px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(13,211,197,0.08);
+    transform: translateY(12px);
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .nr-overlay.open .nr-modal { transform: translateY(0); }
+
+  .nr-header {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .nr-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nr-subtitle {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .nr-conn-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .nr-conn-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .nr-conn-dot.offline { background: var(--red); }
+
+  .nr-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 4px;
+    transition: color 0.15s;
+  }
+  .nr-close:hover { color: var(--text); }
+
+  .nr-body {
+    padding: 14px 16px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nr-body::-webkit-scrollbar { width: 3px; }
+  .nr-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .nr-section-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .nr-key-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .nr-input {
+    flex: 1;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .nr-input::placeholder { color: var(--text-muted); }
+  .nr-input:focus { border-color: var(--cyan-dim); }
+
+  .nr-fetch-btn {
+    background: var(--cyan-glow);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 4px;
+    padding: 7px 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--cyan);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .nr-fetch-btn:hover { background: rgba(13,211,197,0.18); }
+  .nr-fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .nr-status-msg {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    min-height: 16px;
+    transition: color 0.2s;
+  }
+  .nr-status-msg.ok { color: var(--green); }
+  .nr-status-msg.err { color: var(--red); }
+  .nr-status-msg.info { color: var(--text-muted); }
+
+  .nr-models-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .nr-search {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    outline: none;
+    width: 130px;
+    transition: border-color 0.2s;
+  }
+  .nr-search::placeholder { color: var(--text-muted); }
+  .nr-search:focus { border-color: var(--cyan-dim); }
+
+  .nr-model-list {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-y: auto;
+    max-height: 280px;
+  }
+  .nr-model-list::-webkit-scrollbar { width: 3px; }
+  .nr-model-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .nr-group-header {
+    padding: 6px 10px 4px;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+  }
+
+  .nr-model-item {
+    padding: 7px 10px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(30,45,71,0.5);
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nr-model-item:last-child { border-bottom: none; }
+  .nr-model-item:hover { background: var(--bg-2); color: var(--text); }
+  .nr-model-item.selected {
+    background: var(--cyan-glow);
+    color: var(--cyan);
+    border-left: 2px solid var(--cyan);
+    padding-left: 8px;
+  }
+  .nr-model-item.hidden { display: none; }
+
+  .nr-model-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--border-bright);
+    flex-shrink: 0;
+  }
+  .nr-model-item.selected .nr-model-dot { background: var(--cyan); }
+
+  .nr-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .nr-selected-info {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--text-muted);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nr-selected-info.has-model { color: var(--cyan); }
+
+  .nr-footer-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .nr-cancel-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nr-cancel-btn:hover { border-color: var(--border-bright); color: var(--text); }
+
+  .nr-apply-btn {
+    background: var(--cyan);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 18px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--bg);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nr-apply-btn:hover { background: #1af5e6; }
+  .nr-apply-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* 9Router badge in sidebar */
+  .nr-sidebar-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .nr-sidebar-badge:hover { border-color: var(--cyan-dim); }
+  .nr-sidebar-badge .nr-badge-model { color: var(--cyan); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+  .nr-sidebar-badge .nr-badge-arrow { color: var(--text-muted); flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -753,6 +1050,12 @@
       </select>
       <div id="custom-url-row" style="display:none;margin-top:6px">
         <input type="text" class="api-key-input" id="custom-url" placeholder="https://u2026/v1" autocomplete="off">
+      </div>
+      <div id="nr-badge-row" style="display:none">
+        <div class="nr-sidebar-badge" onclick="open9RouterModal()">
+          <span class="nr-badge-model" id="nr-badge-model">click to configure</span>
+          <span class="nr-badge-arrow">u203a</span>
+        </div>
       </div>
       <div id="provider-hint" style="margin-top:5px;font-family:var(--font-mono);font-size:8.5px;color:var(--text-muted);line-height:1.5"></div>
     </div>
@@ -859,6 +1162,41 @@
 
 </div>
 
+<!-- 9ROUTER MODAL -->
+<div class="nr-overlay" id="nr-overlay" onclick="closeNRModal(event)">
+  <div class="nr-modal">
+    <div class="nr-header">
+      <div class="nr-header-left" style="display:flex;align-items:center;gap:8px">
+        <span class="nr-conn-dot" id="nr-conn-dot"></span>
+        <span class="nr-title">9ROUTER</span>
+      </div>
+      <span class="nr-subtitle">Local Proxy — localhost:20128</span>
+    </div>
+    <div class="nr-body">
+      <div class="nr-key-row">
+        <input type="text" class="nr-input" id="nr-key-input"
+          placeholder="sk-&lt;machineId&gt;-…" autocomplete="off"
+          onkeydown="if(event.key==='Enter')fetchNRModels()">
+        <button class="nr-fetch-btn" id="nr-fetch-btn" onclick="fetchNRModels()">FETCH</button>
+      </div>
+      <div class="nr-status-msg" id="nr-status-msg"></div>
+      <div id="nr-model-section" style="display:none">
+        <input type="text" class="nr-search" id="nr-search"
+          placeholder="Filter models…" oninput="filterNRModels()"
+          style="width:100%;margin-bottom:6px">
+        <div class="nr-model-list" id="nr-model-list"></div>
+      </div>
+    </div>
+    <div class="nr-footer">
+      <div class="nr-selected-info" id="nr-selected-info">No model selected</div>
+      <div class="nr-footer-actions">
+        <button class="nr-cancel-btn" onclick="cancelNRModal()">CANCEL</button>
+        <button class="nr-apply-btn" id="nr-apply-btn" onclick="applyNRModal()" disabled>APPLY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -906,18 +1244,29 @@ const PROVIDERS_META = {
   custom:       { placeholder: 'Enter API key',             model: '',                                hint: 'Enter your base URL above' },
 };
 
-function onProviderChange() {
+function onProviderChange(fromInit = false) {
   const p = document.getElementById('provider').value;
   const meta = PROVIDERS_META[p] || {};
-  document.getElementById('api-key').placeholder = meta.placeholder || 'Enter API key';
+
+  if (p !== '9router') nrState.prevProvider = p;
+
   document.getElementById('custom-url-row').style.display = p === 'custom' ? 'block' : 'none';
-  // Set suggested model
+  document.getElementById('api-key').placeholder = meta.placeholder || 'Enter API key';
+
+  if (p === '9router') {
+    if (!fromInit) open9RouterModal();
+    updateNRBadge();
+    document.getElementById('provider-hint').textContent = nrState.appliedKey ? '' : (meta.hint || '');
+    checkReady();
+    return;
+  }
+
+  updateNRBadge();
   const modelInput = document.getElementById('model-input');
   if (!modelInput.value || Object.values(PROVIDERS_META).some(m => m.model === modelInput.value)) {
     modelInput.value = meta.model || '';
   }
   modelInput.placeholder = meta.model || 'auto';
-  // Show hints
   document.getElementById('provider-hint').textContent = meta.hint || '';
   checkReady();
 }
@@ -932,6 +1281,165 @@ function getProviderPayload() {
   const model = document.getElementById('model-input').value.trim();
   if (model) payload.model = model;
   return payload;
+}
+
+// ============ 9ROUTER ============
+let nrState = {
+  prevProvider: 'groq',
+  appliedKey: '',
+  appliedModel: '',
+  selectedModelId: '',
+  models: [],
+};
+
+function open9RouterModal() {
+  document.getElementById('nr-overlay').classList.add('open');
+  const keyInput = document.getElementById('nr-key-input');
+  keyInput.value = nrState.appliedKey || '';
+  setNRStatus('', '');
+  if (nrState.models.length > 0) {
+    document.getElementById('nr-model-section').style.display = 'block';
+    renderNRModels(nrState.models);
+  } else {
+    document.getElementById('nr-model-section').style.display = 'none';
+  }
+  updateNRFooter();
+  setTimeout(() => keyInput.focus(), 60);
+}
+
+function closeNRModal(e) {
+  if (e.target === document.getElementById('nr-overlay')) cancelNRModal();
+}
+
+function cancelNRModal() {
+  document.getElementById('nr-overlay').classList.remove('open');
+  if (!nrState.appliedKey) {
+    document.getElementById('provider').value = nrState.prevProvider;
+    onProviderChange(true);
+  }
+}
+
+async function fetchNRModels() {
+  const key = document.getElementById('nr-key-input').value.trim();
+  if (!key) { setNRStatus('Enter an API key first', 'err'); return; }
+  document.getElementById('nr-fetch-btn').disabled = true;
+  document.getElementById('nr-conn-dot').className = 'nr-conn-dot';
+  setNRStatus('Connectingu2026', 'info');
+  try {
+    const resp = await fetch('http://localhost:20128/v1/models', {
+      headers: { 'Authorization': 'Bearer ' + key }
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const models = (data.data || []).map(m => m.id).sort();
+    nrState.models = models;
+    document.getElementById('nr-conn-dot').className = 'nr-conn-dot online';
+    setNRStatus(models.length + ' models available', 'ok');
+    document.getElementById('nr-model-section').style.display = 'block';
+    document.getElementById('nr-search').value = '';
+    renderNRModels(models);
+  } catch (err) {
+    document.getElementById('nr-conn-dot').className = 'nr-conn-dot offline';
+    setNRStatus('Failed: ' + err.message, 'err');
+    document.getElementById('nr-model-section').style.display = 'none';
+  } finally {
+    document.getElementById('nr-fetch-btn').disabled = false;
+  }
+}
+
+const NR_LABELS = {
+  cc: 'ANTHROPIC / CLAUDE', cx: 'OPENAI', gc: 'GOOGLE GEMINI',
+  qw: 'QWEN', minimax: 'MINIMAX', combo: 'COMBO',
+};
+
+function renderNRModels(models) {
+  const list = document.getElementById('nr-model-list');
+  list.innerHTML = '';
+  const groups = {};
+  models.forEach(id => {
+    const prefix = id.includes('/') ? id.split('/')[0] : id;
+    (groups[prefix] = groups[prefix] || []).push(id);
+  });
+  Object.entries(groups).forEach(([prefix, ids]) => {
+    const hdr = document.createElement('div');
+    hdr.className = 'nr-group-header';
+    hdr.textContent = NR_LABELS[prefix] || prefix.toUpperCase();
+    list.appendChild(hdr);
+    ids.forEach(id => {
+      const item = document.createElement('div');
+      item.className = 'nr-model-item' + (id === nrState.selectedModelId ? ' selected' : '');
+      item.id = 'nr-item-' + id.replace(/\//g, '--');
+      item.onclick = () => selectNRModel(id);
+      item.innerHTML = '<span class="nr-model-dot"></span>' + escapeHtml(id);
+      list.appendChild(item);
+    });
+  });
+  updateNRFooter();
+}
+
+function filterNRModels() {
+  const q = document.getElementById('nr-search').value.toLowerCase();
+  document.querySelectorAll('#nr-model-list .nr-model-item').forEach(el => {
+    el.classList.toggle('hidden', q.length > 0 && !el.textContent.toLowerCase().includes(q));
+  });
+}
+
+function selectNRModel(id) {
+  nrState.selectedModelId = id;
+  document.querySelectorAll('#nr-model-list .nr-model-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById('nr-item-' + id.replace(/\//g, '--'));
+  if (el) el.classList.add('selected');
+  updateNRFooter();
+}
+
+function updateNRFooter() {
+  const info = document.getElementById('nr-selected-info');
+  const btn = document.getElementById('nr-apply-btn');
+  if (nrState.selectedModelId) {
+    info.textContent = nrState.selectedModelId;
+    info.className = 'nr-selected-info has-model';
+    btn.disabled = false;
+  } else {
+    info.textContent = 'No model selected';
+    info.className = 'nr-selected-info';
+    btn.disabled = true;
+  }
+}
+
+function applyNRModal() {
+  const key = document.getElementById('nr-key-input').value.trim();
+  if (!key || !nrState.selectedModelId) return;
+  nrState.appliedKey = key;
+  nrState.appliedModel = nrState.selectedModelId;
+  document.getElementById('api-key').value = key;
+  document.getElementById('model-input').value = nrState.selectedModelId;
+  document.getElementById('nr-overlay').classList.remove('open');
+  document.getElementById('provider-hint').textContent = '';
+  updateNRBadge();
+  checkReady();
+}
+
+function updateNRBadge() {
+  const row = document.getElementById('nr-badge-row');
+  const model = document.getElementById('nr-badge-model');
+  if (document.getElementById('provider').value === '9router') {
+    row.style.display = 'block';
+    if (nrState.appliedModel) {
+      model.textContent = nrState.appliedModel;
+      model.style.color = 'var(--cyan)';
+    } else {
+      model.textContent = 'click to configure u203a';
+      model.style.color = 'var(--amber)';
+    }
+  } else {
+    row.style.display = 'none';
+  }
+}
+
+function setNRStatus(msg, type) {
+  const el = document.getElementById('nr-status-msg');
+  el.textContent = msg;
+  el.className = 'nr-status-msg' + (type ? ' ' + type : '');
 }
 
 // ============ STATE ============
@@ -960,7 +1468,7 @@ function buildPersonaGrid() {
 }
 
 buildPersonaGrid();
-onProviderChange(); // set initial placeholder/model/hint
+onProviderChange(true); // set initial placeholder/model/hint (skip modal)
 
 // ============ PERSONA SELECTION ============
 function selectPersona(p) {
