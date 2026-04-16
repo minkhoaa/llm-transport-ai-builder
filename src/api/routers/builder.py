@@ -11,13 +11,13 @@ from src.api.schemas.payload import (
 from src.config.llm_config import resolve_base_url
 from src.generator.persona_generator import InvalidPersonaError, PersonaGenerator
 from src.services.builder_service import BuilderService
-from src.validator.constraint_validator import ConstraintValidator
+from src.validator.constraint_validator import QualityGate
 
 router = APIRouter(prefix="/builder", tags=["builder"])
 
 _generator = PersonaGenerator()
-_validator = ConstraintValidator()
-_service = BuilderService(generator=_generator, validator=_validator)
+_quality_gate = QualityGate()
+_service = BuilderService(generator=_generator, quality_gate=_quality_gate)
 
 
 @router.post("/generate", response_model=GenerateResponse)

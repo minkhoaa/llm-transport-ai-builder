@@ -10,24 +10,24 @@ from src.api.schemas.payload import (
 )
 from src.config.llm_config import GENERATION_MODEL, resolve_base_url
 from src.generator.persona_generator import GenerationError, PersonaGenerator
-from src.validator.constraint_validator import ConstraintValidator
+from src.validator.constraint_validator import QualityGate
 
 
 class BuilderService:
-    def __init__(self, generator: PersonaGenerator, validator: ConstraintValidator):
+    def __init__(self, generator: PersonaGenerator, quality_gate: QualityGate):
         self._generator = generator
-        self._validator = validator
+        self._quality_gate = quality_gate
 
     def generate_single(
         self, persona: str, api_key: str, base_url: str = "", model: str = ""
     ) -> GenerateResponse:
         self._generator.validate_persona(persona)
-        payload, attempts = self._generator.generate(
+        payload, soft, attempts = self._generator.generate(
             persona, api_key, base_url=base_url, model=model
         )
-        validation = self._validator.validate(
+        validation = self._quality_gate.evaluate(
             limitation_instructions=payload.limitation.limitationInstructions,
-            llm_soft_constraints=payload.softConstraints,
+            soft_constraints=soft,
             api_key=api_key,
             base_url=base_url,
             model=model,
