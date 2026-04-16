@@ -1901,7 +1901,14 @@ function onAssignedToChange() {
 
 function getAssignedTo() {
   const sel = document.getElementById('assigned-to-select');
-  return sel?.value || undefined;
+  const id = sel?.value;
+  if (!id) return undefined;
+  const user = _usersCache.find(u => u._id === id);
+  if (!user) return { _id: id };
+  const obj = { _id: user._id };
+  if (user.name)  obj.name  = user.name;
+  if (user.email) obj.email = user.email;
+  return obj;
 }
 
 async function autoPushIfPassed(data) {
