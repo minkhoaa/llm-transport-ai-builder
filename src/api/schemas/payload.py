@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator, model_s
 
 
 def _random_id() -> int:
-    return random.randint(100_000, 999_999)
+    return random.randint(100, 10_000)
 
 # Hours of scheduling capacity represented by each AM or PM availability slot.
 # Exposed as a constant so downstream tools (prompts, tests) can stay in sync.
