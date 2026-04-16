@@ -1883,12 +1883,13 @@ async function autoPushIfPassed(data) {
     console.log('[auto-push] existing count:', existing.length);
     const normalize = s => (s || '').trim().toLowerCase();
     const existingNames = new Set(existing.map(p => normalize(p.employee?.name)));
-    const duplicate = existingNames.has(normalize(newName));
-    console.log('[auto-push] name:', newName, '| duplicate:', duplicate);
-    if (duplicate) {
-      showToast(`Skipped: "${newName}" already exists`, 'error');
-      return;
-    }
+    const existingIds = new Set(existing.map(p => p.employee?.id).filter(Boolean));
+    const newId = payload.employee?.id;
+    const dupName = existingNames.has(normalize(newName));
+    const dupId = existingIds.has(newId);
+    console.log('[auto-push] name:', newName, '| id:', newId, '| dupName:', dupName, '| dupId:', dupId);
+    if (dupName) { showToast(`Skipped: "${newName}" already exists`, 'error'); return false; }
+    if (dupId)   { showToast(`Skipped: id ${newId} already exists`, 'error'); return false; }
 
     console.log('[auto-push] posting payload...');
     const resp = await fetch(CREW_PROFILES_URL, {
@@ -1920,11 +1921,17 @@ async function autoPushBatch(results) {
     const existing = await fetch(CREW_PROFILES_URL).then(r => r.json());
     const normalize = s => (s || '').trim().toLowerCase();
     const existingNames = new Set(existing.map(p => normalize(p.employee?.name)));
+    const existingIds = new Set(existing.map(p => p.employee?.id).filter(Boolean));
     await Promise.all(passing.map(async r => {
       const payload = r.payload || r;
       const name = payload.employee?.name;
+      const id = payload.employee?.id;
       if (existingNames.has(normalize(name))) {
         showToast(`Skipped: "${name}" already exists`, 'error');
+        return;
+      }
+      if (existingIds.has(id)) {
+        showToast(`Skipped: id ${id} already exists`, 'error');
         return;
       }
       const resp = await fetch(CREW_PROFILES_URL, {
@@ -1933,7 +1940,8 @@ async function autoPushBatch(results) {
         body: JSON.stringify(prepareForPush({ ...payload, assignedTo: ASSIGNED_TO })),
       });
       if (resp.ok) {
-        existingNames.add(normalize(name)); // prevent duplicates within same batch
+        existingNames.add(normalize(name));
+        existingIds.add(id);
         showToast(`Pushed "${name}" to crew profiles`, 'success');
       } else {
         showToast(`Push failed for "${name}": ${resp.status}`, 'error');
