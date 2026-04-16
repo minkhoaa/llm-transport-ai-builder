@@ -103,10 +103,15 @@ def _parse_soft_constraints_lenient(data: dict) -> SoftConstraints:
     return SoftConstraints(**cleaned)
 
 
+_EFFECTIVE_DATE_MIN_DAYS: int = 7    # earliest effective date: 1 week from today
+_EFFECTIVE_DATE_MAX_DAYS: int = 548  # latest effective date: ~18 months from today
+_CALL2_MAX_RETRIES: int = 2          # extraction call retry budget
+
+
 def _random_future_date() -> str:
-    """Return a random future date between 1 week and 18 months from today."""
+    """Return a random future date between _EFFECTIVE_DATE_MIN_DAYS and _EFFECTIVE_DATE_MAX_DAYS."""
     today = date.today()
-    days_ahead = random.randint(7, 548)
+    days_ahead = random.randint(_EFFECTIVE_DATE_MIN_DAYS, _EFFECTIVE_DATE_MAX_DAYS)
     return (today + timedelta(days=days_ahead)).isoformat()
 
 
@@ -194,7 +199,7 @@ class PersonaGenerator:
         soft: SoftConstraints = SoftConstraints()
         last_ext_error: str | None = None
         last_raw2: str = ""
-        for ext_attempt in range(1, 3):  # up to 2 retries
+        for ext_attempt in range(1, _CALL2_MAX_RETRIES + 1):
             logger.debug(f"Call 2 attempt {ext_attempt}/2 for '{persona}'")
             if last_ext_error:
                 ext_messages = [
@@ -230,7 +235,7 @@ class PersonaGenerator:
             except (json.JSONDecodeError, Exception) as exc:
                 last_ext_error = str(exc)
                 logger.warning(f"Call 2 attempt {ext_attempt} failed: {exc}")
-                if ext_attempt == 2:
+                if ext_attempt == _CALL2_MAX_RETRIES:
                     logger.warning("Call 2 exhausted retries u2014 using empty SoftConstraints")
 
         # --- Assemble full payload ---

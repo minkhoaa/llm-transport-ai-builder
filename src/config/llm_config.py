@@ -21,12 +21,12 @@ BASE_URL: str = os.getenv("BASE_URL", PROVIDER_URLS["groq"])
 
 # Models — read from env, with sensible fallbacks
 GENERATION_MODEL: str = os.getenv("GENERATION_MODEL", "openai/gpt-oss-120b")
-GENERATION_TEMPERATURE: float = 0.7
-GENERATION_MAX_TOKENS: int = 2000
+GENERATION_TEMPERATURE: float = float(os.getenv("GENERATION_TEMPERATURE", "0.7"))
+GENERATION_MAX_TOKENS: int = int(os.getenv("GENERATION_MAX_TOKENS", "2000"))
 
 EXTRACTION_MODEL: str = os.getenv("EXTRACTION_MODEL", "openai/gpt-oss-120b")
-EXTRACTION_TEMPERATURE: float = 0.1
-EXTRACTION_MAX_TOKENS: int = 1500
+EXTRACTION_TEMPERATURE: float = float(os.getenv("EXTRACTION_TEMPERATURE", "0.1"))
+EXTRACTION_MAX_TOKENS: int = int(os.getenv("EXTRACTION_MAX_TOKENS", "1500"))
 
 
 def resolve_base_url(provider: str, custom_url: str = "") -> str:

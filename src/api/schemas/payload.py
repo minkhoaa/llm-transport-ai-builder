@@ -9,6 +9,10 @@ from pydantic import BaseModel, Field, field_validator, model_validator, model_s
 
 _id_counter = itertools.count(1)
 
+# Hours of scheduling capacity represented by each AM or PM availability slot.
+# Exposed as a constant so downstream tools (prompts, tests) can stay in sync.
+HOURS_PER_SLOT: int = 5
+
 JobType = Literal["MOV", "WH", "HHG"]
 
 Rating = Literal[
@@ -89,11 +93,11 @@ class EmployeeProfile(BaseModel):
             self.saturdayAm, self.saturdayPm,
             self.sundayAm, self.sundayPm,
         ])
-        max_hrs = slots * 5
+        max_hrs = slots * HOURS_PER_SLOT
         if self.prefHrs > max_hrs:
             raise ValueError(
                 f"prefHrs ({self.prefHrs}) exceeds weekly availability: "
-                f"{slots} slot(s) u00d7 5h = {max_hrs}h max. "
+                f"{slots} slot(s) \u00d7 {HOURS_PER_SLOT}h = {max_hrs}h max. "
                 f"Lower prefHrs or enable more AM/PM slots."
             )
         return self
