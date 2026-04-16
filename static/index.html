@@ -1568,6 +1568,7 @@ async function generateSingle(apiKey) {
   renderResult(data);
   showBatchNav(false);
   showToast('Generated successfully', 'success');
+  await autoPushIfPassed(data);
 }
 
 async function generateBatch(apiKey) {
@@ -1593,6 +1594,7 @@ async function generateBatch(apiKey) {
     if (r.validation && r.validation.passed) stats.passed++;
   });
   updateStatsDisplay();
+  await Promise.all(batchResults.map(r => autoPushIfPassed(r)));
 
   if (batchResults.length === 0) {
     showError(`All ${data.total} generations failed.`);
@@ -1706,6 +1708,33 @@ function updateStatsDisplay() {
   document.getElementById('stat-total').textContent = stats.total;
   document.getElementById('stat-passed').textContent = stats.passed;
   document.getElementById('stat-failed').textContent = stats.failed;
+}
+
+// ============ AUTO-PUSH ============
+const CREW_PROFILES_URL = 'http://134.122.38.194:3000/api/crew-profiles';
+const ASSIGNED_TO = { _id: '69cf64291c12ff47e0ecc6bd', email: 'tukhoa040505@gmail.com', name: 'Minh Khoa' };
+
+async function autoPushIfPassed(data) {
+  const validation = data.validation;
+  if (!validation || !validation.passed) return;
+  const payload = data.payload || data;
+  try {
+    const resp = await fetch(CREW_PROFILES_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, assignedTo: ASSIGNED_TO }),
+    });
+    if (resp.ok) {
+      showToast('Auto-pushed to crew profiles', 'success');
+    } else {
+      const err = await resp.text();
+      showToast(`Push failed: ${resp.status}`, 'error');
+      console.error('Auto-push error:', err);
+    }
+  } catch (e) {
+    showToast('Push failed: network error', 'error');
+    console.error('Auto-push network error:', e);
+  }
 }
 
 // ============ COPY / DOWNLOAD ============
