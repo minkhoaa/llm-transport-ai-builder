@@ -98,7 +98,7 @@ class EmployeeProfile(BaseModel):
         if self.prefHrs > max_hrs:
             raise ValueError(
                 f"prefHrs ({self.prefHrs}) exceeds weekly availability: "
-                f"{slots} slot(s) \× {HOURS_PER_SLOT}h = {max_hrs}h max. "
+                f"{slots} slot(s) × {HOURS_PER_SLOT}h = {max_hrs}h max. "
                 f"Lower prefHrs or enable more AM/PM slots."
             )
         return self
@@ -283,6 +283,7 @@ class GenerateRequest(BaseModel):
     provider: str = "groq"          # known key from PROVIDER_URLS, or "custom"
     base_url: Optional[str] = None  # only used when provider="custom"
     model: Optional[str] = None     # overrides GENERATION_MODEL env var when set
+    excluded_names: List[str] = Field(default_factory=list)  # names already in DB
 
 
 class BatchGenerateRequest(BaseModel):
@@ -293,6 +294,7 @@ class BatchGenerateRequest(BaseModel):
     provider: str = "groq"
     base_url: Optional[str] = None
     model: Optional[str] = None
+    excluded_names: List[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def check_persona_source(self) -> "BatchGenerateRequest":

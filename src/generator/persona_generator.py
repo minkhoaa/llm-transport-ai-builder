@@ -138,11 +138,17 @@ class PersonaGenerator:
         base_url: str = "",
         model: str = "",
         max_retries: int = 3,
+        excluded_names: list[str] | None = None,
     ) -> tuple[FullPayload, SoftConstraints, int]:
         """Run 3-call pipeline. Returns (full_payload, soft_constraints, attempts_used)."""
         client = create_client(api_key, base_url)
         gen_model = model or GENERATION_MODEL
         ext_model = model or EXTRACTION_MODEL
+
+        user_prompt = f"Generate profile for: {persona}"
+        if excluded_names:
+            names_list = ", ".join(f'"{n}"' for n in excluded_names)
+            user_prompt += f"\n\nDo NOT use any of these already-taken names: {names_list}. Choose a completely different name."
 
         # --- Call 1: Profile generator ---
         last_error: str | None = None
@@ -152,7 +158,7 @@ class PersonaGenerator:
             if last_error and attempt > 1:
                 messages = [
                     {"role": "system", "content": GENERATION_SYSTEM_PROMPT},
-                    {"role": "user", "content": f"Generate profile for: {persona}"},
+                    {"role": "user", "content": user_prompt},
                     {"role": "assistant", "content": "I will retry with a corrected response."},
                     {
                         "role": "user",
@@ -165,7 +171,7 @@ class PersonaGenerator:
             else:
                 messages = [
                     {"role": "system", "content": GENERATION_SYSTEM_PROMPT},
-                    {"role": "user", "content": f"Generate profile for: {persona}"},
+                    {"role": "user", "content": user_prompt},
                 ]
 
             logger.debug(f"Call 1 attempt {attempt}/{max_retries} for '{persona}'")
@@ -183,6 +189,11 @@ class PersonaGenerator:
                 data1.pop("_reasoning", None)  # strip CoT -- never exposed
                 partial = PartialPayload(**data1)
                 partial.employee.personalities = [persona]  # lock to selected persona
+                # Enforce name uniqueness at code level (LLM may ignore the prompt instruction)
+                if excluded_names:
+                    norm = lambda s: s.strip().lower()
+                    if norm(partial.employee.name) in {norm(n) for n in excluded_names}:
+                        raise ValueError(f"Name '{partial.employee.name}' is already taken — retrying")
                 break
             except (json.JSONDecodeError, ValidationError, Exception) as exc:
                 last_error = str(exc)

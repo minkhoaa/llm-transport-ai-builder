@@ -19,11 +19,12 @@ class BuilderService:
         self._quality_gate = quality_gate
 
     def generate_single(
-        self, persona: str, api_key: str, base_url: str = "", model: str = ""
+        self, persona: str, api_key: str, base_url: str = "", model: str = "",
+        excluded_names: list[str] | None = None,
     ) -> GenerateResponse:
         self._generator.validate_persona(persona)
         payload, soft, attempts = self._generator.generate(
-            persona, api_key, base_url=base_url, model=model
+            persona, api_key, base_url=base_url, model=model, excluded_names=excluded_names
         )
         validation = self._quality_gate.evaluate(
             limitation_instructions=payload.limitation.limitationInstructions,
@@ -48,9 +49,11 @@ class BuilderService:
         profiles: list[GenerateResponse] = []
         failed = 0
 
+        excluded = list(request.excluded_names)
         for persona in personas:
             try:
-                response = self.generate_single(persona, request.api_key, base_url, model)
+                response = self.generate_single(persona, request.api_key, base_url, model, excluded)
+                excluded.append(response.payload.employee.name)  # grow list within batch
                 profiles.append(response)
             except Exception as exc:
                 logger.warning(f"Batch generation failed for '{persona}': {exc}")
