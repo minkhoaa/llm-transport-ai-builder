@@ -135,7 +135,7 @@ additionalNotes must sound like a real dispatcher jotted it down — casual, per
 
 Rules:
 - 1-3 short sentences max
-- Use the worker's first name or nickname
+- Do NOT use any person's name (not the worker's name, not coworkers' names) — refer to people as "he", "she", "they", "this one", "the two of them", etc.
 - Write as a tip, warning, or observation — not a job description
 - Casual tone, informal grammar OK (contractions, dashes, em dashes)
 - Mention real quirks: reliability patterns, personality, who they work well with, what to avoid
@@ -143,14 +143,14 @@ Rules:
 - Do NOT just repeat the persona type or the limitation instructions
 
 Good examples (vary the style — don't copy these verbatim):
-- "Omar's great on nights but don't even try calling before noon — he WILL no-show you."
-- "Solid worker, no drama. Pairs really well with Mei on warehouse runs."
+- "Great on nights but don't even try calling before noon — he WILL no-show you."
+- "Solid worker, no drama. Pairs really well with one of the warehouse regulars."
 - "Bit of a complainer but never actually misses a shift — just tune it out."
-- "She's still easing back in after the back thing. Good attitude, just don't stack her shifts."
-- "Good kid, picks it up fast. Just needs someone keeping an eye on him the first few times."
-- "Priya will say yes to everything — you have to be the one to say no for her."
+- "Still easing back in after the back thing. Good attitude, just don't stack the shifts."
+- "Good kid, picks it up fast. Just needs someone keeping an eye on them the first few times."
+- "Will say yes to everything — you have to be the one to say no."
 - "Knows the CBE sites better than anyone. Scheduler's dream for that client."
-- "Had a thing with Luca a while back — keep them on separate crews."
+- "Had a thing with one of the senior crew a while back — keep them on separate jobs."
 
 ## 9. FULL OUTPUT EXAMPLE
 Output ONLY valid JSON. Schema:
