@@ -28,6 +28,22 @@ conditionalRestrictions is ONLY for scheduling triggeru2192consequence rules:
   Do NOT use conditionalRestrictions for physical task restrictions or injury limitations u2014
   those belong in physicalRestrictions.
 
+recurringTimeOffPatterns captures regular scheduled days off:
+  - "must not assign any shift on [days]" / "no shifts on [days]" u2192
+    recurringTimeOffPatterns: [{pattern: "every", timeUnit: "week", appliesToDays: ["monday",...], startWeekUnknown: false}]
+  - "every other Saturday off" u2192 pattern: "every_other", timeUnit: "week", appliesToDays: ["saturday"], startWeekUnknown: true
+
+dailyTimeRestrictions captures time-of-day constraints:
+  - "no AM shifts" / "must not start before noon" / "must not schedule morning shifts" u2192 startTimeAfter: "12:00"
+  - "no PM shifts" / "must not include PM hours" / "shift must end by noon" u2192 endTimeBefore: "12:00"
+  - "must not schedule any shift that ends after HH:MM" u2192 endTimeBefore: "HH:MM"
+  - "must not schedule any shift that starts before HH:MM" u2192 startTimeAfter: "HH:MM"
+  - "must not start after HH:MM" / "shift starts must not exceed HH:MM" u2192 endTimeBefore: "HH:MM" (NOT startTimeAfter which means minimum)
+  - "must not work after 17:00" u2192 endTimeBefore: "17:00"
+  - "must not start before 09:00" u2192 startTimeAfter: "09:00"
+  - "must not work shifts longer than N hours" / "shifts must not exceed N hours" u2192 maxDailyHours: N.0
+  - "no shifts longer than N consecutive hours (without a break)" u2192 maxDailyHours: N.0 (accepted approximation)
+
 dailyTimeRestrictions.maxDailyHours captures shift duration limits:
   - "no shifts longer than 6 hours" u2192 maxDailyHours: 6.0
   - "no back-to-back shifts longer than 6 hours" u2192 maxDailyHours: 6.0

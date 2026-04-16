@@ -20,7 +20,7 @@ VALID_CALL1 = {
     },
     "employee": {
         "id": None, "name": "Tom Nguyen", "priority": "Regular",
-        "rating": "3 - Standard", "prefHrs": 40,
+        "rating": "3 - Standard", "prefHrs": 25,
         "mondayAm": False, "mondayPm": True,
         "tuesdayAm": False, "tuesdayPm": True,
         "wednesdayAm": False, "wednesdayPm": True,

@@ -73,6 +73,31 @@ class EmployeeProfile(BaseModel):
             )
         return self
 
+    @model_validator(mode="after")
+    def check_prefhrs_vs_availability(self) -> "EmployeeProfile":
+        """prefHrs must not exceed what the available AM/PM slots can physically support.
+
+        Each AM or PM slot represents ~5 hours of scheduling capacity.
+        A worker with 2 slots cannot prefer 40 hours per week.
+        """
+        slots = sum([
+            self.mondayAm, self.mondayPm,
+            self.tuesdayAm, self.tuesdayPm,
+            self.wednesdayAm, self.wednesdayPm,
+            self.thursdayAm, self.thursdayPm,
+            self.fridayAm, self.fridayPm,
+            self.saturdayAm, self.saturdayPm,
+            self.sundayAm, self.sundayPm,
+        ])
+        max_hrs = slots * 5
+        if self.prefHrs > max_hrs:
+            raise ValueError(
+                f"prefHrs ({self.prefHrs}) exceeds weekly availability: "
+                f"{slots} slot(s) u00d7 5h = {max_hrs}h max. "
+                f"Lower prefHrs or enable more AM/PM slots."
+            )
+        return self
+
 
 # --- Limitation ---
 

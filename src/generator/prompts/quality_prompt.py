@@ -39,6 +39,7 @@ Do NOT flag as issues:
 - physicalRestrictions.bannedTasks or restrictedEnvironments values u2014 free-text strings, not fixed enum.
 - Specific chemical substances in text (spray paints, adhesives, cleaning agents, solvents, etc.) u2014 these are correctly captured by restrictedEnvironments: ["chemical"]; do not flag as missing bannedTasks.
 - maxLiftKg rounding within 15% (e.g. 25 lbs u2248 11.34 kg rounded to 11 is acceptable).
+- dailyTimeRestrictions.maxDailyHours used to approximate "shift duration limit without a break" u2014 this is the accepted schema mapping; do not flag as wrong field.
 - Fields absent when optional and not explicitly mentioned in the text.
 
 Output ONLY valid JSON:

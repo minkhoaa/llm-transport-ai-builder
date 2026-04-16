@@ -81,6 +81,65 @@ def test_job_type_overlap_rejected():
         EmployeeProfile(**make_employee(preferredJobTypes=["HHG"], avoidedJobTypes=["HHG"]))
 
 
+def test_prefhrs_exceeds_slot_capacity_rejected():
+    # Only saturday AM + sunday AM = 2 slots = 10h max, prefHrs=40 should fail
+    with pytest.raises(ValidationError, match="prefHrs"):
+        EmployeeProfile(**make_employee(
+            mondayAm=False, mondayPm=False,
+            tuesdayAm=False, tuesdayPm=False,
+            wednesdayAm=False, wednesdayPm=False,
+            thursdayAm=False, thursdayPm=False,
+            fridayAm=False, fridayPm=False,
+            saturdayAm=True, saturdayPm=False,
+            sundayAm=True, sundayPm=False,
+            prefHrs=40,
+        ))
+
+
+def test_prefhrs_within_slot_capacity_passes():
+    # 2 slots -> max 10h, prefHrs=10 is exactly at the limit
+    e = EmployeeProfile(**make_employee(
+        mondayAm=False, mondayPm=False,
+        tuesdayAm=False, tuesdayPm=False,
+        wednesdayAm=False, wednesdayPm=False,
+        thursdayAm=False, thursdayPm=False,
+        fridayAm=False, fridayPm=False,
+        saturdayAm=True, saturdayPm=False,
+        sundayAm=True, sundayPm=False,
+        prefHrs=10,
+    ))
+    assert e.prefHrs == 10
+
+
+def test_prefhrs_zero_with_no_slots_passes():
+    e = EmployeeProfile(**make_employee(
+        mondayAm=False, mondayPm=False,
+        tuesdayAm=False, tuesdayPm=False,
+        wednesdayAm=False, wednesdayPm=False,
+        thursdayAm=False, thursdayPm=False,
+        fridayAm=False, fridayPm=False,
+        saturdayAm=False, saturdayPm=False,
+        sundayAm=False, sundayPm=False,
+        prefHrs=0,
+    ))
+    assert e.prefHrs == 0
+
+
+def test_prefhrs_40_with_enough_slots_passes():
+    # 8 slots -> max 40h, prefHrs=40 should pass
+    e = EmployeeProfile(**make_employee(
+        mondayAm=True, mondayPm=True,
+        tuesdayAm=True, tuesdayPm=True,
+        wednesdayAm=True, wednesdayPm=True,
+        thursdayAm=True, thursdayPm=True,
+        fridayAm=False, fridayPm=False,
+        saturdayAm=False, saturdayPm=False,
+        sundayAm=False, sundayPm=False,
+        prefHrs=40,
+    ))
+    assert e.prefHrs == 40
+
+
 def test_job_type_no_overlap_passes():
     e = EmployeeProfile(**make_employee(preferredJobTypes=["HHG", "WH"], avoidedJobTypes=["MOV"]))
     assert set(e.preferredJobTypes) & set(e.avoidedJobTypes) == set()

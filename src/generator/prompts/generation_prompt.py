@@ -22,6 +22,9 @@ Your output trains an LLM to handle real-world scheduling soft constraints.
 - preferredJobTypes and avoidedJobTypes MUST use ONLY these three values: "MOV", "WH", "HHG".
 - preferredJobTypes and avoidedJobTypes MUST NOT overlap.
 - limitationInstructions MUST mention 2-3 constraints using "Must not" (hard) or "Try not to" (soft).
+- prefHrs MUST be consistent with AM/PM availability: each true AM or PM slot ≈ 5 hours capacity.
+  A worker with only 2 true slots can work at most 10h/week — prefHrs must not exceed slots × 5.
+  Examples: 2 slots → prefHrs ≤ 10 | 5 slots → prefHrs ≤ 25 | 8 slots → prefHrs ≤ 40 | 14 slots → prefHrs ≤ 70.
 - Do NOT output a softConstraints field — that is handled separately.
 
 ## 2. REFERENCE DATA
@@ -73,8 +76,8 @@ Output JSON structure:
 5. Religious catholic worker: Sabbath/Friday prayers off.
 6. Part-Time Student: Avoids class schedule, basic skills, needs training.
 7. Night Owl: Prefers nights, bad performance mornings.
-8. Early Bird: Wants mornings only, goes to bed at 9pm.
-9. Weekend Warrior: Has weekday job elsewhere.
+8. Early Bird: Wants mornings only, goes to bed at 9pm. limitationInstructions MUST use endTimeBefore (e.g. "Must not schedule any shift that ends after 12:00") to express the morning-only constraint — do NOT write "must not start after HH:MM" (that semantically inverts the schema field).
+9. Weekend Warrior: Has weekday job elsewhere. limitationInstructions must use simple schema-mappable constraints such as dailyTimeRestrictions (max hours per day on weekends), weeklyFrequencyLimits (max shifts per week), or crossDayDependencies — do NOT write multi-condition rules like "crews larger than N without advance notice".
 10. Cranky Old-Timer: Opinionated, doesn't get along with certain people.
 11. Pair bonded: Works best with some partners at some jobs.
 12. Injury-Returning Worker: Serious injury, light duty only.
@@ -87,7 +90,7 @@ Output JSON structure:
 19. Gym Fanatic: Morning/evening workouts must be respected, can lift heavy.
 20. Injury-Returning (Back): Back injury, light duty only. limitationInstructions must include physical restrictions (no heavy lifting, no stair carries).
 21. Injury-Returning (Knee): Knee surgery, no stairs/lifting. limitationInstructions must include physical restrictions (no stair carries, no heavy equipment).
-22. Diabetic (Meal Timing): Needs regular meal breaks, predictable hours.
+22. Diabetic (Meal Timing): Needs regular meal breaks, predictable hours. limitationInstructions must use direct time constraints (e.g. "Must not schedule any shift longer than 5 hours", "Must not schedule shifts that start before 08:00 or end after 18:00") — do NOT write "without a break" or break-interval language.
 23. Chronic Fatigue: Cannot do long/consecutive shifts, must give advance notice.
 24. Allergy-Restricted: Chemical/dust allergies, cannot go to certain sites. limitationInstructions must phrase restrictions as environment types (e.g. "chemical environments", "dusty sites", "sites with heavy dust or chemical exposure") u2014 do NOT list specific substances like spray paint or adhesives.
 25. Eager Rookie: No skills but says yes to everything, needs constant supervision.
