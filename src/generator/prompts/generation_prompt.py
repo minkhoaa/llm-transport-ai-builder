@@ -134,23 +134,42 @@ Output JSON structure:
 additionalNotes must sound like a real dispatcher jotted it down — casual, personal, useful to other schedulers.
 
 Rules:
-- 1-3 short sentences max
-- Do NOT use any person's name (not the worker's name, not coworkers' names) — refer to people as "he", "she", "they", "this one", "the two of them", etc.
-- Write as a tip, warning, or observation — not a job description
-- Casual tone, informal grammar OK (contractions, dashes, em dashes)
-- Mention real quirks: reliability patterns, personality, who they work well with, what to avoid
+- 1-3 sentences, length varies: sometimes one punchy line, sometimes two or three
+- Do NOT use any person's name — refer to people as "he", "she", "they", "this one", "the two of them", etc.
+- Do NOT start notes with "Must", "Must not", "Have to", "Should" — those belong in limitationInstructions, not here
+- Vary sentence structure every time: questions, fragments, observations, warnings, praise, dry humor
+- Vary cultural tone: some notes sound South Asian, East Asian, French-Canadian, Middle Eastern, Filipino — reflect the multicultural workforce naturally through phrasing and attitude, not stereotypes
+- Mention real quirks: reliability, attitude, chemistry with other workers, site knowledge, client fit, physical strengths, personal habits that affect scheduling
 - Do NOT write structured bullet points or corporate HR language
-- Do NOT just repeat the persona type or the limitation instructions
+- Do NOT repeat the persona type or the limitation instructions
 
-Good examples (vary the style — don't copy these verbatim):
-- "Great on nights but don't even try calling before noon — he WILL no-show you."
-- "Solid worker, no drama. Pairs really well with one of the warehouse regulars."
-- "Bit of a complainer but never actually misses a shift — just tune it out."
-- "Still easing back in after the back thing. Good attitude, just don't stack the shifts."
-- "Good kid, picks it up fast. Just needs someone keeping an eye on them the first few times."
-- "Will say yes to everything — you have to be the one to say no."
-- "Knows the CBE sites better than anyone. Scheduler's dream for that client."
-- "Had a thing with one of the senior crew a while back — keep them on separate jobs."
+Style variety — pick a DIFFERENT style each time:
+
+Short/punchy:
+- "Solid. Low maintenance."
+- "Don't overthink it — just put her on the WH runs."
+- "He shows up, he works, he leaves. Perfect."
+
+Observational:
+- "Still finding his footing but you can see the potential. Needs a good lead to follow."
+- "Knows every corner of the CBE sites — better than half the seniors."
+- "She talks a lot but the work gets done, so."
+
+Warning/tip:
+- "Fine most of the time, but don't put her on back-to-back long days — she checks out."
+- "Had a rough patch with one of the regulars last fall. Keep them apart if you can."
+- "Call before 10 or don't bother — no answer guaranteed."
+
+Praise/recommendation:
+- "One of the more reliable ones on the roster. Clients love her."
+- "Put him on anything fragile — zero complaints, zero breakage."
+- "If you need someone to hold a crew together last minute, this is your person."
+
+Dry/cultural flavor:
+- "Works best when she knows the plan in advance. Improvisation is not her thing."
+- "Very polite, very precise — just don't rush him."
+- "She'll do the job right the first time, no question. Just don't expect small talk."
+- "Good energy on site. The younger crew tends to follow his lead naturally."
 
 ## 9. FULL OUTPUT EXAMPLE
 Output ONLY valid JSON. Schema:
