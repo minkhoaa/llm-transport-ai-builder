@@ -303,6 +303,41 @@
     pointer-events: none;
   }
 
+  /* Auto button */
+  .auto-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .auto-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .auto-btn.running {
+    border-color: #ef4444;
+    color: #ef4444;
+    animation: pulse-border 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50%       { box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+  }
+  .auto-status {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    color: var(--text-muted);
+    text-align: center;
+    min-height: 13px;
+  }
+
   /* Selected persona badge */
   .selected-persona {
     background: var(--bg-2);
@@ -1101,6 +1136,8 @@
     <!-- Generate -->
     <div class="sidebar-section">
       <button class="generate-btn" id="generate-btn" onclick="generate()" disabled>GENERATE</button>
+      <button class="auto-btn" id="auto-btn" onclick="toggleAuto()" disabled>AUTO</button>
+      <div class="auto-status" id="auto-status"></div>
     </div>
 
     <!-- Hint -->
@@ -1522,6 +1559,7 @@ function checkReady() {
   const apiKey = document.getElementById('api-key').value.trim();
   const ready = selectedPersona && apiKey.length > 0;
   document.getElementById('generate-btn').disabled = !ready;
+  document.getElementById('auto-btn').disabled = !ready;
 }
 
 document.getElementById('api-key').addEventListener('input', checkReady);
@@ -1719,6 +1757,84 @@ function updateStatsDisplay() {
   document.getElementById('stat-failed').textContent = stats.failed;
 }
 
+// ============ AUTO GENERATE ============
+const VALID_PERSONAS = [
+  'Veteran Lead','Senior worker','Family-First Parent','Caregiver of aging parents',
+  'Religious catholic worker','Part-Time Student','Night Owl','Early Bird',
+  'Weekend Warrior','Cranky Old-Timer','Pair bonded','Injury-Returning Worker',
+  'New Hire (Probationary)','Safety Champion','Regional Road Warrior','Master Packer',
+  'Night School Student','Volunteer','Gym Fanatic','Injury-Returning (Back)',
+  'Injury-Returning (Knee)','Diabetic (Meal Timing)','Chronic Fatigue',
+  'Allergy-Restricted','Eager Rookie','Summer Help','Apprentice',
+];
+
+let autoRunning = false;
+
+async function toggleAuto() {
+  if (autoRunning) {
+    autoRunning = false;
+    document.getElementById('auto-btn').textContent = 'AUTO';
+    document.getElementById('auto-btn').classList.remove('running');
+    document.getElementById('auto-status').textContent = 'Stopped';
+    return;
+  }
+  autoRunning = true;
+  document.getElementById('auto-btn').textContent = 'STOP';
+  document.getElementById('auto-btn').classList.add('running');
+  document.getElementById('generate-btn').disabled = true;
+
+  let pushed = 0, skipped = 0, failed = 0;
+
+  while (autoRunning) {
+    // Pick random persona if none selected, else use selected
+    const persona = selectedPersona
+      ? selectedPersona.name
+      : VALID_PERSONAS[Math.floor(Math.random() * VALID_PERSONAS.length)];
+
+    document.getElementById('auto-status').textContent =
+      `Running... pushed:${pushed} skip:${skipped} fail:${failed}`;
+
+    try {
+      const apiKey = document.getElementById('api-key').value.trim();
+      if (!apiKey) { autoRunning = false; break; }
+
+      const excluded_names = await fetchExcludedNames();
+      const resp = await fetch('/builder/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ persona, api_key: apiKey, excluded_names, ...getProviderPayload() }),
+      });
+
+      if (!resp.ok) { failed++; continue; }
+
+      const data = await resp.json();
+      batchResults = [data]; batchIdx = 0;
+      updateStats(data);
+      renderResult(data);
+      showBatchNav(false);
+
+      if (data.validation?.passed) {
+        const didPush = await autoPushIfPassed(data);
+        if (didPush) pushed++; else skipped++;
+      } else {
+        failed++;
+      }
+    } catch (e) {
+      failed++;
+      console.error('[auto] error:', e);
+    }
+
+    document.getElementById('auto-status').textContent =
+      `Running... pushed:${pushed} skip:${skipped} fail:${failed}`;
+  }
+
+  document.getElementById('auto-btn').textContent = 'AUTO';
+  document.getElementById('auto-btn').classList.remove('running');
+  document.getElementById('auto-status').textContent =
+    `Done u2014 pushed:${pushed} skipped:${skipped} failed:${failed}`;
+  document.getElementById('generate-btn').disabled = false;
+}
+
 // ============ AUTO-PUSH ============
 function deepStripNull(obj) {
   if (Array.isArray(obj)) return obj.map(deepStripNull).filter(v => v !== null && v !== undefined);
@@ -1769,14 +1885,17 @@ async function autoPushIfPassed(data) {
     console.log('[auto-push] response status:', resp.status);
     if (resp.ok) {
       showToast(`Pushed "${newName}" to crew profiles`, 'success');
+      return true;
     } else {
       const err = await resp.text();
       showToast(`Push failed: ${resp.status}`, 'error');
       console.error('[auto-push] error body:', err);
+      return false;
     }
   } catch (e) {
     showToast('Push failed: network error', 'error');
     console.error('[auto-push] network error:', e);
+    return false;
   }
 }
 
