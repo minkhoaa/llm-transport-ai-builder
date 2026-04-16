@@ -8,7 +8,24 @@ from datetime import date, timedelta
 from loguru import logger
 from pydantic import ValidationError
 
-from src.api.schemas.payload import FullPayload, LimitationProfile, PartialPayload, SoftConstraints
+from src.api.schemas.payload import (
+    AdvanceNoticeRequired,
+    ConsecutiveShiftLimit,
+    ConditionalRestriction,
+    CrewSizeRestrictions,
+    CrossDayDependency,
+    DailyTimeRestrictions,
+    FullPayload,
+    InterpersonalConflict,
+    JobTypeRestrictions,
+    LeadershipRestriction,
+    LimitationProfile,
+    PartialPayload,
+    RecurringTimeOffPattern,
+    SoftConstraints,
+    VehicleRestriction,
+    WeeklyFrequencyLimit,
+)
 from src.config.llm_config import (
     EXTRACTION_MAX_TOKENS,
     EXTRACTION_MODEL,
@@ -32,6 +49,56 @@ VALID_PERSONAS = [
     "Diabetic (Meal Timing)", "Chronic Fatigue", "Allergy-Restricted",
     "Eager Rookie", "Summer Help", "Apprentice",
 ]
+
+
+_ARRAY_MODELS: list[tuple[str, type]] = [
+    ("consecutiveShiftLimits", ConsecutiveShiftLimit),
+    ("recurringTimeOffPatterns", RecurringTimeOffPattern),
+    ("crossDayDependencies", CrossDayDependency),
+    ("weeklyFrequencyLimits", WeeklyFrequencyLimit),
+    ("conditionalRestrictions", ConditionalRestriction),
+    ("advanceNoticeRequired", AdvanceNoticeRequired),
+    ("leadershipRestrictions", LeadershipRestriction),
+    ("vehicleRestrictions", VehicleRestriction),
+    ("interpersonalConflicts", InterpersonalConflict),
+]
+
+_OBJECT_MODELS: list[tuple[str, type]] = [
+    ("dailyTimeRestrictions", DailyTimeRestrictions),
+    ("crewSizeRestrictions", CrewSizeRestrictions),
+    ("jobTypeRestrictions", JobTypeRestrictions),
+]
+
+
+def _parse_soft_constraints_lenient(data: dict) -> SoftConstraints:
+    """Parse SoftConstraints, dropping individual invalid items instead of failing entirely."""
+    cleaned: dict = {}
+
+    for field, model_cls in _ARRAY_MODELS:
+        raw_items = data.get(field)
+        if not isinstance(raw_items, list) or not raw_items:
+            continue
+        valid_items = []
+        for item in raw_items:
+            try:
+                model_cls.model_validate(item)
+                valid_items.append(item)
+            except (ValidationError, Exception) as exc:
+                logger.warning(f"Call 2: dropping invalid {field} item u2014 {exc}")
+        if valid_items:
+            cleaned[field] = valid_items
+
+    for field, model_cls in _OBJECT_MODELS:
+        raw_obj = data.get(field)
+        if raw_obj is None:
+            continue
+        try:
+            model_cls.model_validate(raw_obj)
+            cleaned[field] = raw_obj
+        except (ValidationError, Exception) as exc:
+            logger.warning(f"Call 2: dropping invalid {field} u2014 {exc}")
+
+    return SoftConstraints(**cleaned)
 
 
 def _random_future_date() -> str:
@@ -123,26 +190,46 @@ class PersonaGenerator:
 
         # --- Call 2: Constraint extractor ---
         soft: SoftConstraints = SoftConstraints()
+        last_ext_error: str | None = None
+        last_raw2: str = ""
         for ext_attempt in range(1, 3):  # up to 2 retries
             logger.debug(f"Call 2 attempt {ext_attempt}/2 for '{persona}'")
+            if last_ext_error:
+                ext_messages = [
+                    {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
+                    {"role": "user", "content": partial.limitation.limitationInstructions},
+                    {"role": "assistant", "content": last_raw2},
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Your output had validation errors: {last_ext_error}\n"
+                            "Fix the invalid values u2014 check the STRICT ENUM VALUES section u2014 "
+                            "and output corrected JSON."
+                        ),
+                    },
+                ]
+            else:
+                ext_messages = [
+                    {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
+                    {"role": "user", "content": partial.limitation.limitationInstructions},
+                ]
             try:
                 response2 = client.chat.completions.create(
                     model=ext_model,
-                    messages=[
-                        {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
-                        {"role": "user", "content": partial.limitation.limitationInstructions},
-                    ],
+                    messages=ext_messages,
                     temperature=EXTRACTION_TEMPERATURE,
                     max_tokens=EXTRACTION_MAX_TOKENS,
                     response_format={"type": "json_object"},
                 )
-                raw2 = response2.choices[0].message.content
-                soft = SoftConstraints(**json.loads(raw2))
+                last_raw2 = response2.choices[0].message.content
+                data2 = json.loads(last_raw2)
+                soft = _parse_soft_constraints_lenient(data2)
                 break
-            except (json.JSONDecodeError, ValidationError, Exception) as exc:
+            except (json.JSONDecodeError, Exception) as exc:
+                last_ext_error = str(exc)
                 logger.warning(f"Call 2 attempt {ext_attempt} failed: {exc}")
                 if ext_attempt == 2:
-                    logger.warning("Call 2 exhausted retries -- using empty SoftConstraints")
+                    logger.warning("Call 2 exhausted retries u2014 using empty SoftConstraints")
 
         # --- Assemble full payload ---
         payload = FullPayload(
