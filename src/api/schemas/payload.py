@@ -81,12 +81,26 @@ class LimitationProfile(BaseModel):
     limitationInstructions: str
 
 
+# --- Intermediate schema (Call 1 output — no softConstraints, no effectiveDate) ---
+
+class PartialLimitation(BaseModel):
+    """Call 1 output: only the text, no effectiveDate."""
+    limitationInstructions: str
+
+
+class PartialPayload(BaseModel):
+    """Output of Call 1 — no softConstraints."""
+    employee: EmployeeProfile
+    limitation: PartialLimitation
+    skills: List[str]
+
+
 # --- softConstraints sub-models ---
 
 class ConsecutiveShiftLimit(BaseModel):
-    shiftType: str
+    shiftType: Literal["evening", "morning", "night", "day", "any"]
     maxConsecutive: int
-    timeUnit: str
+    timeUnit: Literal["shifts", "days"]
 
 
 class DailyTimeRestrictions(BaseModel):
@@ -115,14 +129,14 @@ class WeeklyFrequencyLimit(BaseModel):
 
 
 class ConditionalTrigger(BaseModel):
-    type: str
+    type: Literal["job_assignment", "shift_scheduled", "day_of_week"]
     clientName: Optional[str] = None
     shiftType: str
     dayOffset: int
 
 
 class ConditionalConsequence(BaseModel):
-    action: str
+    action: Literal["cannot_assign", "requires_notice", "avoid_if_possible"]
     toShiftType: str
     onDayOffset: int
 
@@ -161,13 +175,13 @@ class JobTypeRestrictions(BaseModel):
 
 
 class VehicleRestriction(BaseModel):
-    vehicleType: str
-    restrictionType: str
+    vehicleType: Literal["truck", "van", "any"]
+    restrictionType: Literal["no_day_and_night", "no_double", "cannot_drive"]
 
 
 class InterpersonalConflict(BaseModel):
     conflictEmployeeName: str
-    conflictType: str
+    conflictType: Literal["cannot_work_together", "avoid_if_possible"]
     softConstraint: bool
 
 
@@ -204,16 +218,10 @@ class FullPayload(BaseModel):
 
 # --- Validation report ---
 
-class Discrepancy(BaseModel):
-    field: str
-    type: Literal["generated_only", "extractor_only", "divergent"]
-    note: str
-
-
 class ValidationReport(BaseModel):
     passed: bool
     confidence: Literal["high", "medium", "low"]
-    discrepancies: List[Discrepancy]
+    issues: List[str]  # natural language descriptions from Call 3
 
 
 # --- API request / response ---
