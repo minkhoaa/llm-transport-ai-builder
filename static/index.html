@@ -1712,7 +1712,18 @@ function updateStatsDisplay() {
 function copyOutput() {
   const code = document.getElementById('json-code').textContent;
   if (!code) return;
-  navigator.clipboard.writeText(code).then(() => showToast('Copied to clipboard', 'success'));
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => showToast('Copied to clipboard', 'success'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied to clipboard', 'success');
+  }
 }
 
 function downloadOutput() {
