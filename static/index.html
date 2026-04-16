@@ -1111,6 +1111,11 @@
       <div id="model-hint" style="margin-top:5px;font-family:var(--font-mono);font-size:8.5px;color:var(--text-muted);line-height:1.5"></div>
     </div>
 
+    <div class="sidebar-section">
+      <div class="sidebar-label">Assigned To <span style="color:var(--text-muted);font-size:8px">(user ID)</span></div>
+      <input type="text" class="api-key-input" id="assigned-to-id" placeholder="MongoDB ObjectIdu2026" autocomplete="off" oninput="saveAssignedToId()">
+    </div>
+
     <!-- Mode -->
     <div class="sidebar-section">
       <div class="sidebar-label">Mode</div>
@@ -1507,6 +1512,12 @@ function buildPersonaGrid() {
 buildPersonaGrid();
 onProviderChange(true); // set initial placeholder/model/hint (skip modal)
 
+// Restore assigned-to ID from localStorage
+(function() {
+  const saved = localStorage.getItem('assignedToId');
+  if (saved) document.getElementById('assigned-to-id').value = saved;
+})();
+
 // ============ PERSONA SELECTION ============
 function selectPersona(p) {
   selectedPersona = p;
@@ -1865,7 +1876,13 @@ function prepareForPush(payload) {
 }
 
 const CREW_PROFILES_URL = 'http://134.122.38.194:3000/api/crew-profiles';
-const ASSIGNED_TO = { _id: '69cf64291c12ff47e0ecc6bd', email: 'tukhoa040505@gmail.com', name: 'Minh Khoa' };
+
+function getAssignedToId() {
+  return document.getElementById('assigned-to-id')?.value.trim() || '';
+}
+function saveAssignedToId() {
+  localStorage.setItem('assignedToId', document.getElementById('assigned-to-id').value.trim());
+}
 
 async function autoPushIfPassed(data) {
   const validation = data.validation;
@@ -1895,7 +1912,7 @@ async function autoPushIfPassed(data) {
     const resp = await fetch(CREW_PROFILES_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(prepareForPush({ ...payload, assignedTo: ASSIGNED_TO })),
+      body: JSON.stringify(prepareForPush({ ...payload, assignedTo: getAssignedToId() })),
     });
     console.log('[auto-push] response status:', resp.status);
     if (resp.ok) {
@@ -1937,7 +1954,7 @@ async function autoPushBatch(results) {
       const resp = await fetch(CREW_PROFILES_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(prepareForPush({ ...payload, assignedTo: ASSIGNED_TO })),
+        body: JSON.stringify(prepareForPush({ ...payload, assignedTo: getAssignedToId() })),
       });
       if (resp.ok) {
         existingNames.add(normalize(name));
