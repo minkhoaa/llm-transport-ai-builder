@@ -1725,8 +1725,9 @@ async function autoPushIfPassed(data) {
   const newName = payload.employee?.name;
 
   try {
-    // Check for duplicate name
+    console.log('[auto-push] fetching existing profiles...');
     const existing = await fetch(CREW_PROFILES_URL).then(r => r.json());
+    console.log('[auto-push] existing count:', existing.length);
     const normalize = s => (s || '').trim().toLowerCase();
     const existingNames = new Set(existing.map(p => normalize(p.employee?.name)));
     const duplicate = existingNames.has(normalize(newName));
@@ -1736,21 +1737,23 @@ async function autoPushIfPassed(data) {
       return;
     }
 
+    console.log('[auto-push] posting payload...');
     const resp = await fetch(CREW_PROFILES_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...payload, assignedTo: ASSIGNED_TO }),
     });
+    console.log('[auto-push] response status:', resp.status);
     if (resp.ok) {
       showToast(`Pushed "${newName}" to crew profiles`, 'success');
     } else {
       const err = await resp.text();
       showToast(`Push failed: ${resp.status}`, 'error');
-      console.error('Auto-push error:', err);
+      console.error('[auto-push] error body:', err);
     }
   } catch (e) {
     showToast('Push failed: network error', 'error');
-    console.error('Auto-push network error:', e);
+    console.error('[auto-push] network error:', e);
   }
 }
 
