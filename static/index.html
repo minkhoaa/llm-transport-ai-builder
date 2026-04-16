@@ -1851,14 +1851,16 @@ function deepStripNull(obj) {
 }
 
 function prepareForPush(payload) {
-  const p = deepStripNull(structuredClone(payload));
+  const p = deepStripNull(JSON.parse(JSON.stringify(payload)));
   // rating: "3 - Standard" u2192 3
-  if (p.employee?.rating && typeof p.employee.rating === 'string') {
-    const match = p.employee.rating.match(/^(\d)/);
-    if (match) p.employee.rating = parseInt(match[1], 10);
+  if (p.employee?.rating !== undefined) {
+    const n = parseInt(String(p.employee.rating), 10);
+    if (!isNaN(n)) p.employee.rating = n;
   }
   // assignedTo: send only the _id string
-  if (p.assignedTo?._id) p.assignedTo = p.assignedTo._id;
+  if (p.assignedTo && typeof p.assignedTo === 'object' && p.assignedTo._id) {
+    p.assignedTo = p.assignedTo._id;
+  }
   return p;
 }
 
