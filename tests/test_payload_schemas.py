@@ -96,3 +96,74 @@ def test_batch_request_count_bounds():
 def test_batch_request_needs_persona_or_personas():
     with pytest.raises(ValidationError):
         BatchGenerateRequest(api_key="k")  # neither personas nor persona provided
+
+
+from src.api.schemas.payload import (
+    ConsecutiveShiftLimit,
+    VehicleRestriction,
+    InterpersonalConflict,
+    ConditionalTrigger,
+    ConditionalConsequence,
+    ValidationReport,
+    PartialLimitation,
+    PartialPayload,
+)
+
+
+def test_consecutive_shift_limit_valid_shift_type():
+    c = ConsecutiveShiftLimit(shiftType="night", maxConsecutive=3, timeUnit="shifts")
+    assert c.shiftType == "night"
+
+
+def test_consecutive_shift_limit_invalid_shift_type():
+    with pytest.raises(ValidationError):
+        ConsecutiveShiftLimit(shiftType="graveyard", maxConsecutive=3, timeUnit="shifts")
+
+
+def test_vehicle_restriction_valid():
+    v = VehicleRestriction(vehicleType="truck", restrictionType="cannot_drive")
+    assert v.vehicleType == "truck"
+
+
+def test_vehicle_restriction_invalid():
+    with pytest.raises(ValidationError):
+        VehicleRestriction(vehicleType="bicycle", restrictionType="cannot_drive")
+
+
+def test_interpersonal_conflict_valid():
+    ic = InterpersonalConflict(
+        conflictEmployeeName="John",
+        conflictType="cannot_work_together",
+        softConstraint=False,
+    )
+    assert ic.conflictType == "cannot_work_together"
+
+
+def test_interpersonal_conflict_invalid():
+    with pytest.raises(ValidationError):
+        InterpersonalConflict(
+            conflictEmployeeName="John",
+            conflictType="enemies",
+            softConstraint=False,
+        )
+
+
+def test_validation_report_has_issues_not_discrepancies():
+    r = ValidationReport(passed=True, confidence="high", issues=[])
+    assert r.issues == []
+    assert not hasattr(r, "discrepancies")
+
+
+def test_partial_limitation_no_effective_date():
+    pl = PartialLimitation(limitationInstructions="Must not start before 14:00.")
+    assert pl.limitationInstructions == "Must not start before 14:00."
+    assert not hasattr(pl, "effectiveDate")
+
+
+def test_partial_payload_no_soft_constraints():
+    pp = PartialPayload(
+        employee=EmployeeProfile(**make_employee()),
+        limitation=PartialLimitation(limitationInstructions="Try not to work nights."),
+        skills=["Heavy Carry"],
+    )
+    assert not hasattr(pp, "softConstraints")

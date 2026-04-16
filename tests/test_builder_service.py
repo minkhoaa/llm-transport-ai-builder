@@ -21,24 +21,27 @@ def _make_payload():
             preferredJobTypes=[], avoidedJobTypes=[],
             lovedByCompanies=[], hatedByCompanies=[],
         ),
-        limitation=LimitationProfile(effectiveDate="2026-05-01", limitationInstructions="Must not work nights."),
+        limitation=LimitationProfile(
+            effectiveDate="2026-05-01",
+            limitationInstructions="Must not work nights.",
+        ),
         skills=[],
         softConstraints=SoftConstraints(),
     )
 
 
 def _make_report(passed=True):
-    return ValidationReport(passed=passed, confidence="high", discrepancies=[])
+    return ValidationReport(passed=passed, confidence="high", issues=[])
 
 
 def test_generate_single_returns_response():
     gen = MagicMock()
     gen.validate_persona.return_value = None
-    gen.generate.return_value = (_make_payload(), 1)
-    val = MagicMock()
-    val.validate.return_value = _make_report()
+    gen.generate.return_value = (_make_payload(), SoftConstraints(), 1)
+    qg = MagicMock()
+    qg.evaluate.return_value = _make_report()
 
-    service = BuilderService(generator=gen, validator=val)
+    service = BuilderService(generator=gen, quality_gate=qg)
     response = service.generate_single("Night Owl", "fake_key")
 
     assert isinstance(response, GenerateResponse)
@@ -49,7 +52,7 @@ def test_generate_single_returns_response():
 def test_generate_single_raises_on_invalid_persona():
     gen = MagicMock()
     gen.validate_persona.side_effect = InvalidPersonaError("Unknown")
-    service = BuilderService(generator=gen, validator=MagicMock())
+    service = BuilderService(generator=gen, quality_gate=MagicMock())
 
     with pytest.raises(InvalidPersonaError):
         service.generate_single("Pirate", "fake_key")
@@ -58,11 +61,11 @@ def test_generate_single_raises_on_invalid_persona():
 def test_generate_batch_with_persona_and_count():
     gen = MagicMock()
     gen.validate_persona.return_value = None
-    gen.generate.return_value = (_make_payload(), 1)
-    val = MagicMock()
-    val.validate.return_value = _make_report()
+    gen.generate.return_value = (_make_payload(), SoftConstraints(), 1)
+    qg = MagicMock()
+    qg.evaluate.return_value = _make_report()
 
-    service = BuilderService(generator=gen, validator=val)
+    service = BuilderService(generator=gen, quality_gate=qg)
     request = BatchGenerateRequest(persona="Night Owl", count=3, api_key="fake")
     response = service.generate_batch(request)
 
@@ -74,11 +77,11 @@ def test_generate_batch_with_persona_and_count():
 def test_generate_batch_with_explicit_personas():
     gen = MagicMock()
     gen.validate_persona.return_value = None
-    gen.generate.return_value = (_make_payload(), 1)
-    val = MagicMock()
-    val.validate.return_value = _make_report()
+    gen.generate.return_value = (_make_payload(), SoftConstraints(), 1)
+    qg = MagicMock()
+    qg.evaluate.return_value = _make_report()
 
-    service = BuilderService(generator=gen, validator=val)
+    service = BuilderService(generator=gen, quality_gate=qg)
     request = BatchGenerateRequest(personas=["Night Owl", "Early Bird"], api_key="fake")
     response = service.generate_batch(request)
 
@@ -89,11 +92,11 @@ def test_generate_batch_with_explicit_personas():
 def test_generate_batch_partial_failure():
     gen = MagicMock()
     gen.validate_persona.return_value = None
-    gen.generate.side_effect = [(_make_payload(), 1), GenerationError("failed")]
-    val = MagicMock()
-    val.validate.return_value = _make_report()
+    gen.generate.side_effect = [(_make_payload(), SoftConstraints(), 1), GenerationError("failed")]
+    qg = MagicMock()
+    qg.evaluate.return_value = _make_report()
 
-    service = BuilderService(generator=gen, validator=val)
+    service = BuilderService(generator=gen, quality_gate=qg)
     request = BatchGenerateRequest(personas=["Night Owl", "Early Bird"], api_key="fake")
     response = service.generate_batch(request)
 

@@ -3,76 +3,91 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.api.schemas.payload import (
-    SoftConstraints,
-    ConsecutiveShiftLimit,
-    DailyTimeRestrictions,
-    Discrepancy,
-)
-from src.validator.constraint_validator import ConstraintValidator
+from src.api.schemas.payload import SoftConstraints, DailyTimeRestrictions, ValidationReport
+from src.validator.constraint_validator import QualityGate
 
 
-def make_sc(**kwargs) -> SoftConstraints:
-    return SoftConstraints(**kwargs)
+QUALITY_PASS = {"passed": True, "confidence": "high", "issues": []}
+QUALITY_FAIL = {
+    "passed": False,
+    "confidence": "low",
+    "issues": ["crossDayDependencies present but no night shift in text"],
+}
 
 
-def test_diff_no_discrepancies_when_identical():
-    v = ConstraintValidator()
-    sc = make_sc(consecutiveShiftLimits=[ConsecutiveShiftLimit(shiftType="evening", maxConsecutive=2, timeUnit="shifts")])
-    discrepancies = v._diff(llm=sc, extractor=sc)
-    assert discrepancies == []
-
-
-def test_diff_generated_only_when_extractor_empty():
-    v = ConstraintValidator()
-    llm = make_sc(dailyTimeRestrictions=DailyTimeRestrictions(startTimeAfter="09:00"))
-    extractor = make_sc()
-    discrepancies = v._diff(llm=llm, extractor=extractor)
-    assert any(d.type == "generated_only" for d in discrepancies)
-
-
-def test_diff_extractor_only_when_llm_empty():
-    v = ConstraintValidator()
-    extractor = make_sc(dailyTimeRestrictions=DailyTimeRestrictions(startTimeAfter="09:00"))
-    llm = make_sc()
-    discrepancies = v._diff(llm=llm, extractor=extractor)
-    assert any(d.type == "extractor_only" for d in discrepancies)
-
-
-def test_confidence_high_on_zero_discrepancies():
-    v = ConstraintValidator()
-    report = v._build_report([])
-    assert report.confidence == "high"
-    assert report.passed is True
-
-
-def test_confidence_low_on_three_or_more():
-    v = ConstraintValidator()
-    discrepancies = [
-        Discrepancy(field="f1", type="extractor_only", note=""),
-        Discrepancy(field="f2", type="extractor_only", note=""),
-        Discrepancy(field="f3", type="extractor_only", note=""),
-    ]
-    report = v._build_report(discrepancies)
-    assert report.confidence == "low"
-    assert report.passed is False
-
-
-def test_validate_calls_groq_and_returns_report():
-    v = ConstraintValidator()
-    extractor_output = {"dailyTimeRestrictions": {"startTimeAfter": "14:00"}}
+def _mock_client(response_dict: dict) -> MagicMock:
     mock_client = MagicMock()
     mock_client.chat.completions.create.return_value.choices = [
-        MagicMock(message=MagicMock(content=json.dumps(extractor_output)))
+        MagicMock(message=MagicMock(content=json.dumps(response_dict)))
     ]
-    llm_sc = SoftConstraints()  # empty — extractor finds constraint LLM missed
-    with patch("src.validator.constraint_validator.create_client", return_value=mock_client):
-        report = v.validate(
-            limitation_instructions="Must not start before 2pm.",
-            llm_soft_constraints=llm_sc,
+    return mock_client
+
+
+def test_evaluate_returns_passed_report():
+    qg = QualityGate()
+    with patch("src.validator.constraint_validator.create_client", return_value=_mock_client(QUALITY_PASS)):
+        report = qg.evaluate(
+            limitation_instructions="Must not start before 14:00.",
+            soft_constraints=SoftConstraints(
+                dailyTimeRestrictions=DailyTimeRestrictions(startTimeAfter="14:00")
+            ),
             api_key="fake",
         )
-    assert report.confidence in ("high", "medium", "low")
-    # extractor found a constraint the LLM missed — should be extractor_only
+    assert report.passed is True
+    assert report.confidence == "high"
+    assert report.issues == []
+
+
+def test_evaluate_returns_failed_report():
+    qg = QualityGate()
+    with patch("src.validator.constraint_validator.create_client", return_value=_mock_client(QUALITY_FAIL)):
+        report = qg.evaluate(
+            limitation_instructions="Must not start before 14:00.",
+            soft_constraints=SoftConstraints(),
+            api_key="fake",
+        )
     assert report.passed is False
-    assert any(d.type == "extractor_only" for d in report.discrepancies)
+    assert report.confidence == "low"
+    assert len(report.issues) == 1
+
+
+def test_evaluate_falls_back_on_parse_failure():
+    qg = QualityGate()
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value.choices = [
+        MagicMock(message=MagicMock(content="not json"))
+    ]
+    with patch("src.validator.constraint_validator.create_client", return_value=mock_client):
+        report = qg.evaluate(
+            limitation_instructions="Must not start before 14:00.",
+            soft_constraints=SoftConstraints(),
+            api_key="fake",
+        )
+    assert report.passed is False
+    assert report.confidence == "low"
+    assert any("failed" in issue.lower() for issue in report.issues)
+
+
+def test_evaluate_includes_both_inputs_in_user_message():
+    qg = QualityGate()
+    captured_messages = []
+
+    def capture_call(**kwargs):
+        captured_messages.extend(kwargs.get("messages", []))
+        mock = MagicMock()
+        mock.choices = [MagicMock(message=MagicMock(content=json.dumps(QUALITY_PASS)))]
+        return mock
+
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.side_effect = capture_call
+
+    with patch("src.validator.constraint_validator.create_client", return_value=mock_client):
+        qg.evaluate(
+            limitation_instructions="Must not start before 14:00.",
+            soft_constraints=SoftConstraints(),
+            api_key="fake",
+        )
+
+    user_msg = next(m["content"] for m in captured_messages if m["role"] == "user")
+    assert "limitationInstructions" in user_msg
+    assert "softConstraints" in user_msg
