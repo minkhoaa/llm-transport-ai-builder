@@ -1,13 +1,14 @@
 """Pydantic models for builder payload input and output."""
 from __future__ import annotations
 
-import itertools
+import random
 from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator, model_serializer
 
 
-_id_counter = itertools.count(1)
+def _random_id() -> int:
+    return random.randint(10_000, 99_999)
 
 # Hours of scheduling capacity represented by each AM or PM availability slot.
 # Exposed as a constant so downstream tools (prompts, tests) can stay in sync.
@@ -34,13 +35,13 @@ class CompanyRef(BaseModel):
 # --- Employee ---
 
 class EmployeeProfile(BaseModel):
-    id: int = Field(default_factory=lambda: next(_id_counter))
+    id: int = Field(default_factory=_random_id)
 
     @field_validator("id", mode="before")
     @classmethod
     def generate_id_if_none(cls, v: object) -> int:
         if v is None:
-            return next(_id_counter)
+            return _random_id()
         return int(v)
 
     name: str
