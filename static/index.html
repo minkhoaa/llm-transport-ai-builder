@@ -1727,7 +1727,9 @@ async function autoPushIfPassed(data) {
   try {
     // Check for duplicate name
     const existing = await fetch(CREW_PROFILES_URL).then(r => r.json());
-    const duplicate = existing.some(p => p.employee?.name === newName);
+    const normalize = s => (s || '').trim().toLowerCase();
+    const existingNames = new Set(existing.map(p => normalize(p.employee?.name)));
+    const duplicate = existingNames.has(normalize(newName));
     console.log('[auto-push] name:', newName, '| duplicate:', duplicate);
     if (duplicate) {
       showToast(`Skipped: "${newName}" already exists`, 'error');
@@ -1757,11 +1759,12 @@ async function autoPushBatch(results) {
   if (passing.length === 0) return;
   try {
     const existing = await fetch(CREW_PROFILES_URL).then(r => r.json());
-    const existingNames = new Set(existing.map(p => p.employee?.name));
+    const normalize = s => (s || '').trim().toLowerCase();
+    const existingNames = new Set(existing.map(p => normalize(p.employee?.name)));
     await Promise.all(passing.map(async r => {
       const payload = r.payload || r;
       const name = payload.employee?.name;
-      if (existingNames.has(name)) {
+      if (existingNames.has(normalize(name))) {
         showToast(`Skipped: "${name}" already exists`, 'error');
         return;
       }
@@ -1771,7 +1774,7 @@ async function autoPushBatch(results) {
         body: JSON.stringify({ ...payload, assignedTo: ASSIGNED_TO }),
       });
       if (resp.ok) {
-        existingNames.add(name); // prevent duplicates within same batch
+        existingNames.add(normalize(name)); // prevent duplicates within same batch
         showToast(`Pushed "${name}" to crew profiles`, 'success');
       } else {
         showToast(`Push failed for "${name}": ${resp.status}`, 'error');
