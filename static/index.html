@@ -1850,6 +1850,18 @@ function deepStripNull(obj) {
   return obj;
 }
 
+function prepareForPush(payload) {
+  const p = deepStripNull(structuredClone(payload));
+  // rating: "3 - Standard" u2192 3
+  if (p.employee?.rating && typeof p.employee.rating === 'string') {
+    const match = p.employee.rating.match(/^(\d)/);
+    if (match) p.employee.rating = parseInt(match[1], 10);
+  }
+  // assignedTo: send only the _id string
+  if (p.assignedTo?._id) p.assignedTo = p.assignedTo._id;
+  return p;
+}
+
 const CREW_PROFILES_URL = 'http://134.122.38.194:3000/api/crew-profiles';
 const ASSIGNED_TO = { _id: '69cf64291c12ff47e0ecc6bd', email: 'tukhoa040505@gmail.com', name: 'Minh Khoa' };
 
@@ -1880,7 +1892,7 @@ async function autoPushIfPassed(data) {
     const resp = await fetch(CREW_PROFILES_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(deepStripNull({ ...payload, assignedTo: ASSIGNED_TO })),
+      body: JSON.stringify(prepareForPush({ ...payload, assignedTo: ASSIGNED_TO })),
     });
     console.log('[auto-push] response status:', resp.status);
     if (resp.ok) {
@@ -1916,7 +1928,7 @@ async function autoPushBatch(results) {
       const resp = await fetch(CREW_PROFILES_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(deepStripNull({ ...payload, assignedTo: ASSIGNED_TO })),
+        body: JSON.stringify(prepareForPush({ ...payload, assignedTo: ASSIGNED_TO })),
       });
       if (resp.ok) {
         existingNames.add(normalize(name)); // prevent duplicates within same batch
