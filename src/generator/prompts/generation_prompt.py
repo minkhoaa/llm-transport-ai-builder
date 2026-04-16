@@ -115,6 +115,16 @@ Rules:
 - You MAY use any wording a real person would use: "doesn't do well with...", "keep him off...", "fine as long as...", "late finishes are rough", "better if...", "not a great fit for...", "works best when...", "give her a heads-up", etc.
 - The wording can be natural, but the underlying constraint must still be unmistakable
 - Do NOT turn it into a generic personality summary — it still needs to communicate actual scheduling limitations
+- limitationInstructions and additionalNotes MUST feel like two different people could have written them: do not reuse the same wording, cadence, examples, or focal points across both fields
+- limitationInstructions should focus on schedule impact and boundaries; additionalNotes should focus on interpersonal reality, work habits, reliability, temperament, client fit, or practical scheduler tips
+
+Voice families — rotate aggressively:
+- Blunt ops lead: clipped, direct, zero fluff
+- Warm coordinator: empathetic, practical, human
+- Veteran dispatcher: matter-of-fact, shorthand-heavy, seen-it-all tone
+- Detail-oriented admin: precise, observant, slightly formal
+- Tired but honest scheduler: conversational, lightly exasperated, realistic
+- Calm professional: concise, balanced, understated
 
 Style variety — rotate styles aggressively:
 
@@ -179,6 +189,16 @@ Rules:
 - Mention real quirks: reliability, attitude, chemistry with other workers, site knowledge, client fit, physical strengths, personal habits that affect scheduling
 - Do NOT write structured bullet points or corporate HR language
 - Do NOT repeat the persona type or the limitation instructions
+- additionalNotes and limitationInstructions MUST not sound copied from each other: different wording, different cadence, different emphasis
+- If limitationInstructions is blunt and operational, make additionalNotes more observational or human; if limitationInstructions is detailed, keep additionalNotes punchier
+
+Voice families — rotate these too:
+- Friendly dispatcher
+- Dry ops veteran
+- Quietly observant coordinator
+- Straight-to-the-point scheduler
+- Slightly chatty team lead
+- Practical office admin
 
 Style variety — pick a DIFFERENT style each time:
 
