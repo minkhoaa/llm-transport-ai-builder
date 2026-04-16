@@ -26,7 +26,28 @@ conditionalRestrictions is ONLY for scheduling triggeru2192consequence rules:
   Trigger REQUIRED fields: type, shiftType (use "any" if not specific), dayOffset
   Consequence REQUIRED fields: action, toShiftType (use "any" if not specific), onDayOffset
   Do NOT use conditionalRestrictions for physical task restrictions or injury limitations u2014
-  those belong in leadershipRestrictions or are simply not extractable.
+  those belong in physicalRestrictions.
+
+dailyTimeRestrictions.maxDailyHours captures shift duration limits:
+  - "no shifts longer than 6 hours" u2192 maxDailyHours: 6.0
+  - "no back-to-back shifts longer than 6 hours" u2192 maxDailyHours: 6.0
+  - "must not work more than 8 hours in a day" u2192 maxDailyHours: 8.0
+
+physicalRestrictions captures medical/physical limitations that cannot be expressed as scheduling rules:
+  - "no lifting" / "light duty" / "light-duty only" u2192 dutyLevel: "light"
+  - "no heavy lifting" / "limited carry" / "carry loads over Xkg" u2192 maxLiftKg: [X]
+  - "no stair carries" u2192 bannedTasks: ["stair_carry"]
+  - "no heavy carry" u2192 bannedTasks: ["heavy_carry"]
+  - "no overhead work" u2192 bannedTasks: ["overhead_work"]
+  - "no operating heavy equipment" u2192 bannedTasks: ["heavy_equipment_operation"]
+  - "no repetitive lifting" u2192 bannedTasks: ["repetitive_lifting"]
+  - "chemical cleaning" / "chemical exposure" / "chemical allergies" / "chemical environments" u2192 restrictedEnvironments: ["chemical"]
+  - "dusty environments" / "dust exposure" / "dust allergies" / "high particulate matter" u2192 restrictedEnvironments: ["dusty"]
+  - If text mentions BOTH chemicals AND dust u2192 restrictedEnvironments: ["chemical", "dusty"]
+  - "no outdoor work" u2192 restrictedEnvironments: ["outdoor"]
+  - "no cold storage" u2192 restrictedEnvironments: ["cold_storage"]
+  - noteSummary: ONLY include if text has specific context worth preserving (1 sentence max)
+  - dutyLevel: ONLY set if text explicitly says "light duty", "medium duty", or "full duty"
 
 Example structure (omit any field not applicable):
 {
@@ -37,35 +58,12 @@ Example structure (omit any field not applicable):
   "weeklyFrequencyLimits": [{"shiftType": "night", "maxPerWeek": 2}],
   "conditionalRestrictions": [{"trigger": {"type": "job_assignment", "clientName": "Alberta Health Services", "shiftType": "any", "dayOffset": 0}, "consequence": {"action": "cannot_assign", "toShiftType": "night", "onDayOffset": 0}, "originalPhrase": "Must not work nights when assigned to AHS"}],
   "advanceNoticeRequired": [{"shiftType": "weekend", "daysRequired": 3, "ambiguous": false}],
-  "crewSizeRestrictions": {"minCrewSize": 2, "maxCrewSize": 6, "allowedSizes": null, "appliesToLeadershipOnly": false},
+  "crewSizeRestrictions": {"minCrewSize": 2, "maxCrewSize": 6, "appliesToLeadershipOnly": false},
   "leadershipRestrictions": [{"maxCrewSize": 8, "allowedJobTypes": ["MOV", "WH"], "entityResolutionRequired": false}],
-  "jobTypeRestrictions": {"whitelist": null, "blacklist": ["HHG"], "whitelistClients": null, "blacklistClients": null, "entityResolutionRequired": false},
+  "jobTypeRestrictions": {"blacklist": ["HHG"], "entityResolutionRequired": false},
   "vehicleRestrictions": [{"vehicleType": "truck", "restrictionType": "cannot_drive"}],
-  "interpersonalConflicts": [{"conflictEmployeeName": "John Smith", "conflictType": "cannot_work_together", "softConstraint": false}]
-}
-
-physicalRestrictions captures medical/physical limitations that cannot be expressed as scheduling rules:
-  - "no lifting" / "light duty" → dutyLevel: "light"
-  - "no heavy lifting" / "limited carry" → maxLiftKg: [number]
-  - "no stair carries" → bannedTasks: ["stair_carry"]
-  - "no heavy carry" → bannedTasks: ["heavy_carry"]
-  - "no overhead work" → bannedTasks: ["overhead_work"]
-  - "no operating heavy equipment" → bannedTasks: ["heavy_equipment_operation"]
-  - "no repetitive lifting" → bannedTasks: ["repetitive_lifting"]
-  - "no chemical exposure" / "chemical allergies" → restrictedEnvironments: ["chemical"]
-  - "no dust exposure" / "dust allergies" → restrictedEnvironments: ["dusty"]
-  - "no outdoor work" → restrictedEnvironments: ["outdoor"]
-  - "no cold storage" → restrictedEnvironments: ["cold_storage"]
-  - noteSummary: brief description of the physical limitation (1-2 sentences)
-
-Example:
-{
-  "physicalRestrictions": {
-    "maxLiftKg": 10,
-    "bannedTasks": ["stair_carry", "heavy_carry"],
-    "dutyLevel": "light",
-    "noteSummary": "Returning from back surgery — no heavy lifting or stair carries until cleared by physician."
-  }
+  "interpersonalConflicts": [{"conflictEmployeeName": "John Smith", "conflictType": "cannot_work_together", "softConstraint": false}],
+  "physicalRestrictions": {"maxLiftKg": 10, "bannedTasks": ["stair_carry"], "restrictedEnvironments": ["chemical", "dusty"], "dutyLevel": "light"}
 }
 
 Rules:

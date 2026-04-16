@@ -188,13 +188,21 @@ class InterpersonalConflict(BaseModel):
 class PhysicalRestrictions(BaseModel):
     """Medical/physical constraints not expressible via scheduling categories."""
     maxLiftKg: Optional[int] = None
+
+    @field_validator("maxLiftKg", mode="before")
+    @classmethod
+    def coerce_float_to_int(cls, v: object) -> object:
+        if isinstance(v, float):
+            return round(v)
+        return v
     # suggested values: "stair_carry", "heavy_carry", "overhead_work",
     #                   "heavy_equipment_operation", "repetitive_lifting"
     bannedTasks: Optional[List[str]] = None
     # suggested values: "dusty", "chemical", "outdoor", "cold_storage"
     restrictedEnvironments: Optional[List[str]] = None
-    dutyLevel: Literal["light", "medium", "full"] = "full"
-    noteSummary: str = ""
+    # Only set when explicitly stated in the text
+    dutyLevel: Optional[Literal["light", "medium", "full"]] = None
+    noteSummary: Optional[str] = None
 
 
 # --- SoftConstraints aggregate ---

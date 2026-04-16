@@ -172,8 +172,8 @@ def test_partial_payload_no_soft_constraints():
 
 def test_physical_restrictions_defaults():
     pr = PhysicalRestrictions()
-    assert pr.dutyLevel == "full"
-    assert pr.noteSummary == ""
+    assert pr.dutyLevel is None
+    assert pr.noteSummary is None
     assert pr.maxLiftKg is None
     assert pr.bannedTasks is None
     assert pr.restrictedEnvironments is None
@@ -201,6 +201,13 @@ def test_physical_restrictions_full_fields():
     assert pr.maxLiftKg == 10
     assert "stair_carry" in pr.bannedTasks
     assert pr.dutyLevel == "light"
+
+
+def test_physical_restrictions_float_lift_kg_coerced():
+    pr = PhysicalRestrictions(maxLiftKg=9.07)
+    assert pr.maxLiftKg == 9
+    pr2 = PhysicalRestrictions(maxLiftKg=11.34)
+    assert pr2.maxLiftKg == 11
 
 
 def test_soft_constraints_with_physical_restrictions():
