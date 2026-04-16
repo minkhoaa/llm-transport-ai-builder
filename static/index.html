@@ -1862,10 +1862,15 @@ function deepStripNull(obj) {
 
 function prepareForPush(payload) {
   const p = deepStripNull(JSON.parse(JSON.stringify(payload)));
-  // rating: "3 - Standard" u2192 3
+  // rating: "3 - Standard" → 3
   if (p.employee?.rating !== undefined) {
     const n = parseInt(String(p.employee.rating), 10);
     if (!isNaN(n)) p.employee.rating = n;
+  }
+  // server assigns its own id and name
+  if (p.employee) {
+    p.employee.id   = null;
+    p.employee.name = null;
   }
   return p;
 }
