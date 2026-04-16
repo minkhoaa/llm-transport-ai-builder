@@ -5,7 +5,7 @@ from openai import OpenAI
 
 # --- Provider registry ---
 PROVIDER_URLS: dict[str, str] = {
-    "9router":    "http://localhost:20128/v1",
+    "9router":    os.getenv("NINER_ROUTER_URL", "http://localhost:20128/v1"),
     "groq":       "https://api.groq.com/openai/v1",
     "openai":     "https://api.openai.com/v1",
     "minimax":    "https://api.minimax.chat/v1",
