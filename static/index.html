@@ -1914,11 +1914,13 @@ function getAssignedTo() {
 async function autoPushIfPassed(data) {
   if (!data.validation?.passed) return false;
   const payload = data.payload || data;
+  const prepared = prepareForPush({ ...payload, assignedTo: getAssignedTo() });
+  console.log('[push] prepared payload:', JSON.stringify(prepared, null, 2));
   try {
     const resp = await fetch(CREW_PROFILES_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(prepareForPush({ ...payload, assignedTo: getAssignedTo() })),
+      body: JSON.stringify(prepared),
     });
     if (resp.ok) {
       showToast(`Pushed "${payload.employee?.name}" to crew profiles`, 'success');
