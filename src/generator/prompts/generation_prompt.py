@@ -1,4 +1,4 @@
-"""System prompt for LLM call #1: full payload generation."""
+"""System prompt for LLM call #1: profile generator (no softConstraints)."""
 from src.config.clients import CLIENTS as _CLIENTS
 
 _CLIENT_TABLE = "\n".join(
@@ -13,18 +13,59 @@ Your output trains an LLM to handle real-world scheduling soft constraints.
 
 ## 1. CRITICAL RULES
 - priority MUST be exactly "Regular", "Part-Time", or "Extras". NO exceptions.
-- rating MUST be exactly one of these labeled strings: "1 - Poor", "2 - Needs Improvement", "3 - Standard", "4 - Above Average", "5 - Exceptional". Match the persona's seniority and performance level.
+- rating MUST be exactly one of: "1 - Poor", "2 - Needs Improvement", "3 - Standard", "4 - Above Average", "5 - Exceptional".
 - Certifications MUST have the prefix "Certification (...)" e.g. "Certification (WHMIS)".
 - Regular skills have NO prefix. Both go in the SAME skills array.
-- personalities is an ARRAY of strings (e.g. ["Night Owl", "Late starter"]).
-- For hard constraints use "Must not" or "Never"; for soft constraints use "Try not to".
-- AM/PM booleans MUST logically match the persona (Night Owl: all AM fields false).
-- lovedByCompanies and hatedByCompanies MUST use ONLY clients from Section 5 below.
-- preferredJobTypes and avoidedJobTypes MUST use ONLY these three values: "MOV", "WH", "HHG". NO other strings.
-- preferredJobTypes and avoidedJobTypes MUST NOT overlap (same value cannot appear in both).
-- The softConstraints you output MUST directly reflect the limitationInstructions text.
+- personalities MUST be an array with EXACTLY ONE string: the exact persona name requested (e.g. ["Night Owl"]).
+- AM/PM booleans MUST logically match the persona (Night Owl: all AM fields false, all PM fields true on weekdays).
+- lovedByCompanies and hatedByCompanies MUST use ONLY clients from Section 2 below.
+- preferredJobTypes and avoidedJobTypes MUST use ONLY these three values: "MOV", "WH", "HHG".
+- preferredJobTypes and avoidedJobTypes MUST NOT overlap.
+- limitationInstructions MUST mention 2-3 constraints using "Must not" (hard) or "Try not to" (soft).
+- Do NOT output a softConstraints field — that is handled separately.
 
-## 2. THE 27 PERSONA DICTIONARY
+## 2. REFERENCE DATA
+
+### Available Skills
+Regular skills: Heavy Carry, Stair Carry, HHG, IT, Lead (2-8 ppl), Lead (9-15 ppl),
+Lead (small deliveries), Supervisor (16-25 ppl), Truck Driver, Van Driver,
+Installer (Basic), Installer (Standard), Installer (Advanced), Installer (Hanging),
+Installer (New Furniture), Packer (Household), Packer (Commercial),
+Whse 1 Helper, Whse 4 Helper, OMD Equip Repair
+
+Certifications: Certification (WHMIS), Certification (Fall Arrest), Certification (CANA)
+
+### Client Registry (ONLY use these for lovedByCompanies / hatedByCompanies)
+{{_CLIENT_TABLE}}
+
+## 3. CHAIN-OF-THOUGHT OUTPUT FORMAT
+You MUST emit `_reasoning` as the FIRST key before any data fields.
+`_reasoning` contains your decision rationale and is stripped before the response is returned.
+
+Output JSON structure:
+{{
+  "_reasoning": {{
+    "schedule": "why AM/PM booleans are set this way for this persona",
+    "skills": "which skills match this persona and why",
+    "priority": "Regular/Part-Time/Extras and why",
+    "limitation_plan": "which 2-3 constraints will appear and what phrases trigger them"
+  }},
+  "employee": {{ ... }},
+  "skills": [ ... ],
+  "limitation": {{
+    "limitationInstructions": "natural language text with Must not / Try not to"
+  }}
+}}
+
+## 4. HARD RULES
+- priority enum must match exactly: Regular | Part-Time | Extras
+- rating enum must match exactly: 1 - Poor | 2 - Needs Improvement | 3 - Standard | 4 - Above Average | 5 - Exceptional
+- Certification prefix is mandatory: "Certification (WHMIS)" not "WHMIS"
+- No invented clients — lovedByCompanies/hatedByCompanies only from Section 2
+- preferredJobTypes and avoidedJobTypes must not overlap
+- Output ONLY valid JSON (no markdown, no explanation outside JSON)
+
+## 5. THE 27 PERSONA DICTIONARY
 1. Veteran Lead: High performer, crew chief, company face.
 2. Senior worker: Highly paid, advanced skills, specialized, trainer.
 3. Family-First Parent: Has kids, avoids school pickups, kids activities.
@@ -53,67 +94,21 @@ Your output trains an LLM to handle real-world scheduling soft constraints.
 26. Summer Help: Seasonal student, can only work certain months.
 27. Apprentice: Must always be paired with a mentor.
 
-## 3. THE 11 SOFT CONSTRAINTS (trigger 2-3 in limitationInstructions)
-1. dailyTimeRestrictions: Max hours, start after, or end before a time.
-2. recurringTimeOffPatterns: Scheduled predictable off-time (e.g. every Saturday off).
-3. consecutiveShiftLimits: Max shifts/days in a row.
-4. weeklyFrequencyLimits: Max frequency per week for a specific shift type.
-5. crossDayDependencies: Night shift means off next morning.
-6. conditionalRestrictions: If working for client X, cannot do Y shift.
-7. crewSizeRestrictions: Min/max people on the job.
-8. leadershipRestrictions: Ban/limit on acting as leader.
-9. jobTypeRestrictions: Ban/preference for job types or clients.
-10. vehicleRestrictions: Limits on vehicle driving.
-11. interpersonalConflicts: Must not work with specific employee.
-
-## 4. AVAILABLE SKILLS
-Regular skills: Heavy Carry, Stair Carry, HHG, IT, Lead (2-8 ppl), Lead (9-15 ppl),
-Lead (small deliveries), Supervisor (16-25 ppl), Truck Driver, Van Driver,
-Installer (Basic), Installer (Standard), Installer (Advanced), Installer (Hanging),
-Installer (New Furniture), Packer (Household), Packer (Commercial),
-Whse 1 Helper, Whse 4 Helper, OMD Equip Repair
-
-Certifications (use prefix "Certification (...)"):
-Certification (WHMIS), Certification (Fall Arrest), Certification (CANA)
-
-## 5. CLIENT REGISTRY (ONLY use these for lovedByCompanies / hatedByCompanies)
-{_CLIENT_TABLE}
-
-## 6. softConstraints SCHEMA
-Output softConstraints matching this structure. Omit empty arrays/null fields:
+## 6. FULL OUTPUT EXAMPLE
+Output ONLY valid JSON. Schema:
 {{
-  "consecutiveShiftLimits": [{{"shiftType": "evening|morning|night|any", "maxConsecutive": int, "timeUnit": "shifts|days"}}],
-  "dailyTimeRestrictions": {{"startTimeAfter": "HH:MM", "endTimeBefore": "HH:MM", "maxDailyHours": float, "appliesToDays": ["monday"]}},
-  "recurringTimeOffPatterns": [{{"pattern": "every_other|every_second", "timeUnit": "week", "appliesToDays": ["saturday"], "startWeekUnknown": bool}}],
-  "crossDayDependencies": [{{"ifShift": "evening", "thenCannotWork": "morning", "nextDayOffset": 1}}],
-  "weeklyFrequencyLimits": [{{"shiftType": "night|double", "maxPerWeek": int}}],
-  "conditionalRestrictions": [{{"trigger": {{"type": "job_assignment", "clientName": "...", "shiftType": "any", "dayOffset": 0}}, "consequence": {{"action": "cannot_assign", "toShiftType": "night", "onDayOffset": 0}}, "originalPhrase": "..."}}],
-  "advanceNoticeRequired": [{{"shiftType": "weekend", "daysRequired": int, "ambiguous": bool}}],
-  "crewSizeRestrictions": {{"minCrewSize": int, "maxCrewSize": int, "allowedSizes": null, "appliesToLeadershipOnly": bool}},
-  "leadershipRestrictions": [{{"maxCrewSize": null, "allowedJobTypes": ["Residential"], "entityResolutionRequired": false}}],
-  "jobTypeRestrictions": {{"whitelist": null, "blacklist": ["Large Office Moving"], "whitelistClients": ["CBE"], "blacklistClients": null, "entityResolutionRequired": false}},
-  "vehicleRestrictions": [{{"vehicleType": "truck|van|any", "restrictionType": "no_day_and_night|no_double|cannot_drive"}}],
-  "interpersonalConflicts": [{{"conflictEmployeeName": "...", "conflictType": "cannot_work_together|avoid_if_possible", "softConstraint": bool}}]
-}}
-
-## 7. CHAIN OF THOUGHT
-1. Analyze the persona traits.
-2. Set AM/PM boolean fields logically.
-3. Choose skills/certifications matching seniority.
-4. Write limitationInstructions triggering 2-3 constraints using "Must not" / "Try not to".
-5. Fill softConstraints to match the limitationInstructions exactly.
-6. Pick 0-3 lovedByCompanies and 0-2 hatedByCompanies from Section 5.
-7. Validate: priority enum, certification prefix, names consistent.
-
-## 8. OUTPUT FORMAT
-Output ONLY valid JSON (no markdown). Schema:
-{{
+  "_reasoning": {{
+    "schedule": "Night Owl avoids mornings — all AM fields false, PM fields true on weekdays",
+    "skills": "Experienced enough for Truck Driver and Heavy Carry",
+    "priority": "Regular — full-time availability",
+    "limitation_plan": "dailyTimeRestrictions (start after 2pm), consecutiveShiftLimits (max 3 night shifts)"
+  }},
   "employee": {{
     "id": null,
-    "name": "[realistic name]",
-    "priority": "Regular|Part-Time|Extras",
+    "name": "[realistic full name]",
+    "priority": "Regular",
     "rating": "3 - Standard",
-    "prefHrs": 40,
+    "prefHrs": 35,
     "mondayAm": false, "mondayPm": true,
     "tuesdayAm": false, "tuesdayPm": true,
     "wednesdayAm": false, "wednesdayPm": true,
@@ -121,18 +116,16 @@ Output ONLY valid JSON (no markdown). Schema:
     "fridayAm": false, "fridayPm": true,
     "saturdayAm": false, "saturdayPm": false,
     "sundayAm": false, "sundayPm": false,
-    "personalities": ["persona trait"],
-    "additionalNotes": "realistic edge-case note",
-    "preferredJobTypes": ["HHG", "WH"],
+    "personalities": ["Night Owl"],
+    "additionalNotes": "[realistic edge-case note]",
+    "preferredJobTypes": ["WH"],
     "avoidedJobTypes": ["MOV"],
-    "lovedByCompanies": [{{"clientId": 2, "clientName": "ATCO Blue Flame Kitchen"}}],
+    "lovedByCompanies": [{{"clientId": 22, "clientName": "University of Calgary"}}],
     "hatedByCompanies": []
   }},
+  "skills": ["Truck Driver", "Heavy Carry"],
   "limitation": {{
-    "effectiveDate": "2026-05-01",
-    "limitationInstructions": "natural language text with Must not / Try not to"
-  }},
-  "skills": ["Heavy Carry", "Certification (WHMIS)"],
-  "softConstraints": {{ ... }}
+    "limitationInstructions": "Must not start any shift before 14:00. Try not to schedule more than 3 consecutive night shifts."
+  }}
 }}
 """
