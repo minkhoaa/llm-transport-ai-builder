@@ -32,7 +32,7 @@ class QualityGate:
         user_message = json.dumps(
             {
                 "limitationInstructions": limitation_instructions,
-                "softConstraints": soft_constraints.model_dump(),
+                "softConstraints": soft_constraints.model_dump(exclude_none=True),
             },
             indent=2,
         )

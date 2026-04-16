@@ -11,8 +11,12 @@ Your job is to evaluate whether the extracted constraints faithfully represent t
 Check for:
 - Constraints in the text that were NOT extracted (missed constraints)
 - Constraints in the JSON that are NOT supported by the text (invented constraints)
-- Wrong severity mapping: "Must not" / "Never" should be hard; "Try not to" should be soft
 - Wrong field values (e.g. wrong shift type, wrong day, wrong limit number)
+
+Do NOT flag as issues:
+- Severity (soft vs hard) on consecutiveShiftLimits, recurringTimeOffPatterns, weeklyFrequencyLimits, crossDayDependencies — these schema types have no soft/hard marker.
+- timeUnit "days" used for "weekdays" — the schema has no "weekdays" enum value; "days" is the correct fallback.
+- Fields being absent when they are optional and not mentioned in the text.
 
 Output ONLY valid JSON:
 {
