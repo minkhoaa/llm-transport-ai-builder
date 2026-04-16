@@ -1595,20 +1595,12 @@ async function generate() {
   }
 }
 
-async function fetchExcludedNames() {
-  try {
-    const existing = await fetch(CREW_PROFILES_URL).then(r => r.json());
-    return existing.map(p => p.employee?.name).filter(Boolean);
-  } catch { return []; }
-}
-
 async function generateSingle(apiKey) {
   document.getElementById('spinner-text').textContent = 'GENERATING...';
-  const excluded_names = await fetchExcludedNames();
   const resp = await fetch('/builder/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ persona: selectedPersona.name, api_key: apiKey, excluded_names, ...getProviderPayload() }),
+    body: JSON.stringify({ persona: selectedPersona.name, api_key: apiKey, ...getProviderPayload() }),
   });
 
   if (!resp.ok) {
@@ -1629,11 +1621,10 @@ async function generateSingle(apiKey) {
 
 async function generateBatch(apiKey) {
   document.getElementById('spinner-text').textContent = `GENERATING ${batchCount}...`;
-  const excluded_names = await fetchExcludedNames();
   const resp = await fetch('/builder/generate/batch', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ persona: selectedPersona.name, count: batchCount, api_key: apiKey, excluded_names, ...getProviderPayload() }),
+    body: JSON.stringify({ persona: selectedPersona.name, count: batchCount, api_key: apiKey, ...getProviderPayload() }),
   });
 
   if (!resp.ok) {
@@ -1808,11 +1799,10 @@ async function toggleAuto() {
       const apiKey = document.getElementById('api-key').value.trim();
       if (!apiKey) { autoRunning = false; break; }
 
-      const excluded_names = await fetchExcludedNames();
       const resp = await fetch('/builder/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ persona, api_key: apiKey, excluded_names, ...getProviderPayload() }),
+        body: JSON.stringify({ persona, api_key: apiKey, ...getProviderPayload() }),
       });
 
       if (!resp.ok) { failed++; continue; }
