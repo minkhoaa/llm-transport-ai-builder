@@ -38,6 +38,14 @@ Whse 1 Helper, Whse 4 Helper, OMD Equip Repair
 
 Certifications: Certification (WHMIS), Certification (Fall Arrest), Certification (CANA)
 
+### Skills Sizing Rules (STRICT)
+- Total skills must match experience: 1-2 for rookies/new hires, 2-4 for mid-level, 4-7 for senior/specialized.
+- Lead tiers are MUTUALLY EXCLUSIVE — pick exactly ONE that fits (e.g. Lead (2-8 ppl) OR Lead (9-15 ppl), never both).
+- Supervisor (16-25 ppl) only for Veteran Lead or Senior worker.
+- Certifications: 0 for Eager Rookie / New Hire / Summer Help; 1 for most workers; all 3 only for Safety Champion.
+- Injury-Returning personas must NOT have Heavy Carry, Stair Carry, or physical equipment skills.
+- Skills must make sense together — a Packer persona gets Packer skills, not Lead skills.
+
 ### Client Registry (ONLY use these for lovedByCompanies / hatedByCompanies)
 {{_CLIENT_TABLE}}
 
@@ -49,7 +57,7 @@ Output JSON structure:
 {{
   "_reasoning": {{
     "schedule": "why AM/PM booleans are set this way for this persona",
-    "skills": "which skills match this persona and why",
+    "skills": "which 1-7 skills match this persona, why each one, and why others are excluded",
     "priority": "Regular/Part-Time/Extras and why",
     "limitation_plan": "which 2-3 constraints will appear and what phrases trigger them"
   }},
