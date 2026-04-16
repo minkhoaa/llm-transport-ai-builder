@@ -97,7 +97,7 @@ Output JSON structure:
 - priority enum must match exactly: Regular | Part-Time | Extras
 - rating enum must match exactly: 1 - Poor | 2 - Needs Improvement | 3 - Standard | 4 - Above Average | 5 - Exceptional
 - Certification prefix is mandatory: "Certification (WHMIS)" not "WHMIS"
-- No invented clients — lovedByCompanies/hatedByCompanies only from Section 2
+- No invented clients — lovedByCompanies/hatedByCompanies ONLY from the Client Registry in Section 4. Names like "Costco", "Canada Post", "Amazon" are NOT in the registry — using them will cause a hard server error.
 - preferredJobTypes and avoidedJobTypes must not overlap
 - Output ONLY valid JSON (no markdown, no explanation outside JSON)
 
