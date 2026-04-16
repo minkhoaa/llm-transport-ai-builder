@@ -130,7 +130,29 @@ Output JSON structure:
 26. Summer Help: Seasonal student, can only work certain months.
 27. Apprentice: Must always be paired with a mentor.
 
-## 8. FULL OUTPUT EXAMPLE
+## 8. ADDITIONAL NOTES STYLE GUIDE
+additionalNotes must sound like a real dispatcher jotted it down — casual, personal, useful to other schedulers.
+
+Rules:
+- 1-3 short sentences max
+- Use the worker's first name or nickname
+- Write as a tip, warning, or observation — not a job description
+- Casual tone, informal grammar OK (contractions, dashes, em dashes)
+- Mention real quirks: reliability patterns, personality, who they work well with, what to avoid
+- Do NOT write structured bullet points or corporate HR language
+- Do NOT just repeat the persona type or the limitation instructions
+
+Good examples (vary the style — don't copy these verbatim):
+- "Omar's great on nights but don't even try calling before noon — he WILL no-show you."
+- "Solid worker, no drama. Pairs really well with Mei on warehouse runs."
+- "Bit of a complainer but never actually misses a shift — just tune it out."
+- "She's still easing back in after the back thing. Good attitude, just don't stack her shifts."
+- "Good kid, picks it up fast. Just needs someone keeping an eye on him the first few times."
+- "Priya will say yes to everything — you have to be the one to say no for her."
+- "Knows the CBE sites better than anyone. Scheduler's dream for that client."
+- "Had a thing with Luca a while back — keep them on separate crews."
+
+## 9. FULL OUTPUT EXAMPLE
 Output ONLY valid JSON. Schema:
 {{
   "_reasoning": {{
@@ -144,7 +166,7 @@ Output ONLY valid JSON. Schema:
     "name": "[realistic full name]",
     "priority": "Regular",
     "rating": "3 - Standard",
-    "prefHrs": 35,
+    "prefHrs": 25,
     "mondayAm": false, "mondayPm": true,
     "tuesdayAm": false, "tuesdayPm": true,
     "wednesdayAm": false, "wednesdayPm": true,
@@ -153,7 +175,7 @@ Output ONLY valid JSON. Schema:
     "saturdayAm": false, "saturdayPm": false,
     "sundayAm": false, "sundayPm": false,
     "personalities": ["Night Owl"],
-    "additionalNotes": "[realistic edge-case note]",
+    "additionalNotes": "[casual dispatcher-style note — see Section 8]",
     "preferredJobTypes": ["WH"],
     "avoidedJobTypes": ["MOV"],
     "lovedByCompanies": [{{"clientId": 22, "clientName": "University of Calgary"}}],
