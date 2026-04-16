@@ -22,7 +22,7 @@ BASE_URL: str = os.getenv("BASE_URL", PROVIDER_URLS["groq"])
 # Models — read from env, with sensible fallbacks
 GENERATION_MODEL: str = os.getenv("GENERATION_MODEL", "openai/gpt-oss-120b")
 GENERATION_TEMPERATURE: float = float(os.getenv("GENERATION_TEMPERATURE", "0.7"))
-GENERATION_MAX_TOKENS: int = int(os.getenv("GENERATION_MAX_TOKENS", "2000"))
+GENERATION_MAX_TOKENS: int = int(os.getenv("GENERATION_MAX_TOKENS", "3000"))
 
 EXTRACTION_MODEL: str = os.getenv("EXTRACTION_MODEL", "openai/gpt-oss-120b")
 EXTRACTION_TEMPERATURE: float = float(os.getenv("EXTRACTION_TEMPERATURE", "0.1"))

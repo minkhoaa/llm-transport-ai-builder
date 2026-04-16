@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import random
 from datetime import date, timedelta
 
@@ -38,6 +39,19 @@ from src.config.llm_config import (
 )
 from src.generator.prompts.extraction_prompt import EXTRACTION_SYSTEM_PROMPT
 from src.generator.prompts.generation_prompt import GENERATION_SYSTEM_PROMPT
+
+def _repair_json(raw: str) -> str:
+    """Best-effort fixes for common LLM JSON issues before parsing."""
+    # Strip markdown code fences if present
+    raw = re.sub(r'^```(?:json)?\s*', '', raw.strip(), flags=re.IGNORECASE)
+    raw = re.sub(r'\s*```$', '', raw.strip())
+    # Remove trailing commas before } or ]
+    raw = re.sub(r',\s*([}\]])', r'\1', raw)
+    # Replace curly/smart quotes with straight quotes
+    raw = raw.replace('\u201c', '"').replace('\u201d', '"')
+    raw = raw.replace('\u2018', "'").replace('\u2019', "'")
+    return raw
+
 
 VALID_PERSONAS = [
     "Veteran Lead", "Senior worker", "Family-First Parent",
@@ -185,7 +199,7 @@ class PersonaGenerator:
             raw1 = response.choices[0].message.content
 
             try:
-                data1 = json.loads(raw1)
+                data1 = json.loads(_repair_json(raw1))
                 data1.pop("_reasoning", None)  # strip CoT -- never exposed
                 partial = PartialPayload(**data1)
                 partial.employee.personalities = [persona]  # lock to selected persona
