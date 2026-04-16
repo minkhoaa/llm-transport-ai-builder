@@ -1113,9 +1113,9 @@
 
     <div class="sidebar-section">
       <div class="sidebar-label">Assigned To</div>
-      <input type="text" class="api-key-input" id="assigned-to-id" placeholder="_id (ObjectId)" autocomplete="off" oninput="saveAssignedTo()" style="margin-bottom:5px">
-      <input type="text" class="api-key-input" id="assigned-to-name" placeholder="name" autocomplete="off" oninput="saveAssignedTo()" style="margin-bottom:5px">
-      <input type="text" class="api-key-input" id="assigned-to-email" placeholder="email" autocomplete="off" oninput="saveAssignedTo()">
+      <select class="api-key-input" id="assigned-to-select" onchange="onAssignedToChange()" style="cursor:pointer">
+        <option value="">Loading...</option>
+      </select>
     </div>
 
     <!-- Mode -->
@@ -1514,15 +1514,8 @@ function buildPersonaGrid() {
 buildPersonaGrid();
 onProviderChange(true); // set initial placeholder/model/hint (skip modal)
 
-// Restore assigned-to fields from localStorage
-(function() {
-  const id    = localStorage.getItem('assignedToId');
-  const name  = localStorage.getItem('assignedToName');
-  const email = localStorage.getItem('assignedToEmail');
-  if (id)    document.getElementById('assigned-to-id').value    = id;
-  if (name)  document.getElementById('assigned-to-name').value  = name;
-  if (email) document.getElementById('assigned-to-email').value = email;
-})();
+// Load users into Assigned To dropdown
+loadUsers();
 
 // ============ PERSONA SELECTION ============
 function selectPersona(p) {
@@ -1879,20 +1872,38 @@ function prepareForPush(payload) {
 
 const CREW_PROFILES_URL = 'http://134.122.38.194:3000/api/crew-profiles';
 
-function getAssignedTo() {
-  const _id  = document.getElementById('assigned-to-id')?.value.trim() || '';
-  const name = document.getElementById('assigned-to-name')?.value.trim() || '';
-  const email = document.getElementById('assigned-to-email')?.value.trim() || '';
-  const obj = {};
-  if (_id)   obj._id   = _id;
-  if (name)  obj.name  = name;
-  if (email) obj.email = email;
-  return Object.keys(obj).length ? obj : undefined;
+let _usersCache = [];
+
+async function loadUsers() {
+  const sel = document.getElementById('assigned-to-select');
+  try {
+    const data = await fetch('http://134.122.38.194:3000/api/users').then(r => r.json());
+    _usersCache = Array.isArray(data) ? data : (data.data || data.users || []);
+    const saved = localStorage.getItem('assignedToId') || '';
+    sel.innerHTML = '<option value="">-- select user --</option>' +
+      _usersCache.map(u =>
+        `<option value="${u._id}" ${u._id === saved ? 'selected' : ''}>${u.name}</option>`
+      ).join('');
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load users</option>';
+  }
 }
-function saveAssignedTo() {
-  localStorage.setItem('assignedToId',    document.getElementById('assigned-to-id')?.value.trim() || '');
-  localStorage.setItem('assignedToName',  document.getElementById('assigned-to-name')?.value.trim() || '');
-  localStorage.setItem('assignedToEmail', document.getElementById('assigned-to-email')?.value.trim() || '');
+
+function onAssignedToChange() {
+  const sel = document.getElementById('assigned-to-select');
+  localStorage.setItem('assignedToId', sel.value);
+}
+
+function getAssignedTo() {
+  const sel = document.getElementById('assigned-to-select');
+  const id = sel?.value;
+  if (!id) return undefined;
+  const user = _usersCache.find(u => u._id === id);
+  if (!user) return { _id: id };
+  const obj = { _id: user._id };
+  if (user.name)  obj.name  = user.name;
+  if (user.email) obj.email = user.email;
+  return obj;
 }
 
 async function autoPushIfPassed(data) {
