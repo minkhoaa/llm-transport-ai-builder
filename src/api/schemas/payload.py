@@ -6,6 +6,8 @@ from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator, model_serializer
 
+from src.config.clients import CLIENT_IDS, CLIENT_NAMES
+
 
 def _random_id() -> int:
     return random.randint(100, 10_000)
@@ -68,6 +70,21 @@ class EmployeeProfile(BaseModel):
     avoidedJobTypes: List[JobType] = Field(default_factory=list)
     lovedByCompanies: List[CompanyRef]
     hatedByCompanies: List[CompanyRef]
+
+    @model_validator(mode="after")
+    def check_company_refs(self) -> "EmployeeProfile":
+        """Every company in lovedByCompanies/hatedByCompanies must exist in the client registry."""
+        for ref in self.lovedByCompanies + self.hatedByCompanies:
+            if ref.clientId not in CLIENT_IDS:
+                raise ValueError(
+                    f"clientId {ref.clientId} not in client registry."
+                )
+            if ref.clientName not in CLIENT_NAMES:
+                raise ValueError(
+                    f"clientName '{ref.clientName}' not in client registry. "
+                    f"Use the exact name from the Client Registry list."
+                )
+        return self
 
     @model_validator(mode="after")
     def check_no_overlap(self) -> "EmployeeProfile":
