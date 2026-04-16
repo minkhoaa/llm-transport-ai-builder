@@ -21,7 +21,21 @@ Employee names MUST reflect Calgary's multicultural workforce. Use this distribu
 - ~10% Filipino / Southeast Asian (e.g. Maria Santos, Khoa Nguyen, Aisha Reyes)
 Do NOT default to Anglo names — vary ethnicity across generated profiles.
 
-## 2. CRITICAL RULES
+## 2. RATING DISTRIBUTION
+Do NOT default to high ratings. Use a realistic bell-curve distribution:
+- "1 - Poor"           → ~5%  (chronic issues, frequent no-shows)
+- "2 - Needs Improvement" → ~15% (below average, needs supervision)
+- "3 - Standard"       → ~40% (solid, reliable, meets expectations)
+- "4 - Above Average"  → ~30% (dependable, proactive, trusted)
+- "5 - Exceptional"    → ~10% (rare — reserved for Veteran Lead, Senior worker, Safety Champion)
+
+Rating MUST match the persona:
+- Veteran Lead, Senior worker, Safety Champion → 4 or 5
+- New Hire (Probationary), Eager Rookie, Apprentice, Summer Help → 2 or 3
+- Injury-Returning personas → 2 or 3 (current limitations reduce effectiveness)
+- All other personas → 2, 3, or 4 based on the individual's backstory
+
+## 3. CRITICAL RULES
 
 - priority MUST be exactly "Regular", "Part-Time", or "Extras". NO exceptions.
 - rating MUST be exactly one of: "1 - Poor", "2 - Needs Improvement", "3 - Standard", "4 - Above Average", "5 - Exceptional".
@@ -38,7 +52,7 @@ Do NOT default to Anglo names — vary ethnicity across generated profiles.
   Examples: 2 slots → prefHrs ≤ 10 | 5 slots → prefHrs ≤ 25 | 8 slots → prefHrs ≤ 40 | 14 slots → prefHrs ≤ 70.
 - Do NOT output a softConstraints field — that is handled separately.
 
-## 3. REFERENCE DATA
+## 4. REFERENCE DATA
 
 ### Available Skills
 Regular skills: Heavy Carry, Stair Carry, HHG, IT, Lead (2-8 ppl), Lead (9-15 ppl),
@@ -60,7 +74,7 @@ Certifications: Certification (WHMIS), Certification (Fall Arrest), Certificatio
 ### Client Registry (ONLY use these for lovedByCompanies / hatedByCompanies)
 {{_CLIENT_TABLE}}
 
-## 4. CHAIN-OF-THOUGHT OUTPUT FORMAT
+## 5. CHAIN-OF-THOUGHT OUTPUT FORMAT
 You MUST emit `_reasoning` as the FIRST key before any data fields.
 `_reasoning` contains your decision rationale and is stripped before the response is returned.
 
@@ -79,7 +93,7 @@ Output JSON structure:
   }}
 }}
 
-## 5. HARD RULES
+## 6. HARD RULES
 - priority enum must match exactly: Regular | Part-Time | Extras
 - rating enum must match exactly: 1 - Poor | 2 - Needs Improvement | 3 - Standard | 4 - Above Average | 5 - Exceptional
 - Certification prefix is mandatory: "Certification (WHMIS)" not "WHMIS"
@@ -87,7 +101,7 @@ Output JSON structure:
 - preferredJobTypes and avoidedJobTypes must not overlap
 - Output ONLY valid JSON (no markdown, no explanation outside JSON)
 
-## 6. THE 27 PERSONA DICTIONARY
+## 7. THE 27 PERSONA DICTIONARY
 1. Veteran Lead: High performer, crew chief, company face.
 2. Senior worker: Highly paid, advanced skills, specialized, trainer.
 3. Family-First Parent: Has kids, avoids school pickups, kids activities.
@@ -116,7 +130,7 @@ Output JSON structure:
 26. Summer Help: Seasonal student, can only work certain months.
 27. Apprentice: Must always be paired with a mentor.
 
-## 7. FULL OUTPUT EXAMPLE
+## 8. FULL OUTPUT EXAMPLE
 Output ONLY valid JSON. Schema:
 {{
   "_reasoning": {{
